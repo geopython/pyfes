@@ -10,7 +10,7 @@ from lxml import etree
 
 logging.getLogger(__name__)
 
-OGC_SCHEMA
+OGC_SCHEMA_REPOSITORY_URL = "http://schemas.opengis.net"
 
 
 def get_parser():
@@ -43,14 +43,15 @@ def _get_main_schema_path(schema_dir, version):
 def main(fes_version=None, schema_dir=None):
     if schema_dir is None:
         # download the schemas
-        schema_dir = ""
+        #schema_dir = ""
         # lets try lxml's way first
-        schema_url = ""
-        schema_el = etree.parse()
+        schema_url = "/".join(OGC_SCHEMA_REPOSITORY_URL, "filter",
+                              fes_version, "filterAll.xsd")
+        schema_el = etree.parse(schema_url)
     else:
-        pass
-    main_schema_path = _get_main_schema_path(schema_dir, fes_version)
-    schema_el = etree.parse(main_schema_path)
+        main_schema_path = _get_main_schema_path(schema_dir, fes_version)
+        schema_el = etree.parse(main_schema_path)
+    schema = etree.XMLSchema(schema_el)  # this takes a while
 
 
 
