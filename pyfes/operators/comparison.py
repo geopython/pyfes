@@ -1,5 +1,8 @@
 """
 Comparison operator classes
+
+Please refer to page 19, section 7.7 - Comparison Operators for more
+details.
 """
 
 from __future__ import absolute_import
@@ -51,7 +54,7 @@ class OperatorParser(object):
                             NillOperator]
         current = 0
         while instance is None and current < len(operator_classes):
-            instance = operator_classes[current].deserialize(operator)
+            instance = operator_classes[current].from_xml(operator)
             current += 1
         return instance
 
@@ -93,7 +96,7 @@ class BinaryComparisonOperator(base.BinaryComparisonWithTwoExpressions):
         self.operator_type = operator_type
 
     @classmethod
-    def deserialize(cls, operator_element):
+    def from_xml(cls, operator_element):
         """Create a new object from an XML element"""
         instance = None
         qname = etree.QName(operator_element)
@@ -141,7 +144,7 @@ class LikeOperator(base.BinaryComparisonWithTwoExpressions):
         self.escape_char = escape_char
 
     @classmethod
-    def deserialize(cls, operator_element):
+    def from_xml(cls, operator_element):
         """Create a new object from an XML element"""
         instance = None
         qname = etree.QName(operator_element)
@@ -218,7 +221,7 @@ class Boundary(object):
         return result
 
     @classmethod
-    def deserialize(cls, boundary_element):
+    def from_xml(cls, boundary_element):
         """Create a new object from an XML element"""
         instance = None
         qname = etree.QName(boundary_element)
@@ -268,7 +271,7 @@ class BetweenComparisonOperator(base.BinaryComparisonWithOneExpression):
         self.upper_boundary = upper_boundary
 
     @classmethod
-    def deserialize(cls, operator_element):
+    def from_xml(cls, operator_element):
         """Create a new object from an XML element"""
         instance = None
         qname = etree.QName(operator_element)

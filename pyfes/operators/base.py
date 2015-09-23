@@ -1,5 +1,8 @@
 """
 Base classes for the operator types defined in the FES standard.
+
+The source code follows the class hierarchy presented in the
+standard. Please refer to Section 7 - Filter for more details.
 """
 
 from __future__ import absolute_import
@@ -15,16 +18,25 @@ logger = logging.getLogger(__name__)
 
 class Operator(object):
 
-    def serialize(self, as_string=True):
+    def to_xml(self, as_string=True):
         """Serialize to XML"""
-        result = self._serialize()
+        result = self._to_xml()
         if as_string:
             result = etree.tostring(result, pretty_print=True)
         return result
 
     @classmethod
-    def deserialize(cls, xml_element):
+    def from_xml(cls, xml_element):
         """Return a new instance by parsing the input XML
+
+        The default implementation does nothing so this method must be
+        reimplemented in child classes.
+        """
+        return None
+
+    @classmethod
+    def from_ogc_common(cls, expression):
+        """Return a new instance by parsing the input OGC_Common expression
 
         The default implementation does nothing so this method must be
         reimplemented in child classes.
