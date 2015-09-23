@@ -58,3 +58,6 @@ target/
 
 # vim files
 *.un~
+
+# sublime text project files
+*.sublime-*
