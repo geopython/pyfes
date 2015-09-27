@@ -5,7 +5,7 @@ Run these tests with nose.
 """
 
 from __future__ import absolute_import
-from nose.tools import eq_, assert_is_not_none
+from nose.tools import eq_
 from unittest import TestCase
 import logging
 
@@ -54,38 +54,56 @@ class TestExpressionParser(BaseTestCase):
         eq_(instance.value, self.literal_expression.value)
 
 
-class TestValueReference(BaseTestCase):
+class TestValueReference(TestCase):
 
     @classmethod
     def setupClass(cls):
-        super(TestValueReference, cls).setupClass()
+        cls.value_reference_text = "Dummy"
+        xml_expression = (
+            "<fes:ValueReference xmlns:fes='{0[fes]}' "
+            "xmlns:xsi='{0[xsi]}' xsi:schemaLocation='{0[fes]} "
+            "http://schemas.opengis.net/filter/2.0.0/filterAll.xsd'>"
+            "{1}</fes:ValueReference>".format(namespaces,
+                                              cls.value_reference_text)
+        )
+        cls.value_reference_element = etree.fromstring(xml_expression)
 
-    def test_deserialize(self):
+    def test_from_xml(self):
         """Deserialize ValueReference from XML works correctly"""
-        instance = expression.ValueReference.deserialize(
+        instance = expression.ValueReference.from_xml(
             self.value_reference_element)
         eq_(instance.value, self.value_reference_text)
 
-    def test_serialize(self):
+    def test_to_xml(self):
         """Serialize ValueReference to XML works correctly"""
-        serialized_xml_el = self.value_reference_expression.serialize(
-            as_string=False)
-        eq_(self.value_reference_element.tag, serialized_xml_el.tag)
-        eq_(self.value_reference_element.text, serialized_xml_el.text)
+        instance = expression.ValueReference(self.value_reference_text)
+        serialized_xml_el = instance.to_xml(as_string=False)
+        eq_(instance.XML_ENTITY_NAME,
+            etree.QName(serialized_xml_el.tag).localname)
+        eq_(instance.value, serialized_xml_el.text)
 
 
-class TestLiteral(BaseTestCase):
+class TestLiteral(TestCase):
 
     @classmethod
     def setupClass(cls):
-        super(TestLiteral, cls).setupClass()
+        cls.literal_value = "30"
+        xml_expression = (
+            "<fes:Literal xmlns:fes='{0[fes]}' xmlns:xsi='{0[xsi]}' "
+            "xsi:schemaLocation='{0[fes]} "
+            "http://schemas.opengis.net/filter/2.0.0/filterAll.xsd'>"
+            "{1}</fes:Literal>".format(namespaces, cls.literal_value)
+        )
+        cls.literal_element = etree.fromstring(xml_expression)
 
-    def test_deserialize(self):
+    def test_from_xml(self):
         """Deserialize Literal from XML works correctly"""
-        instance = expression.Literal.deserialize(self.literal_element)
-        eq_(instance.value, self.literal_text)
+        instance = expression.Literal.from_xml(self.literal_element)
+        eq_(instance.value, self.literal_value)
 
-    def test_serialize(self):
+    def test_to_xml(self):
         """Serialize Literal to XML works correctly"""
-        serialized_xml_el = self.literal_expression.serialize(as_string=False)
-        eq_(self.literal_element.tag, serialized_xml_el.tag)
+        instance = expression.Literal(self.literal_value)
+        serialized_xml_el = instance.to_xml(as_string=False)
+        eq_(instance.XML_ENTITY_NAME,
+            etree.QName(serialized_xml_el.tag).localname)

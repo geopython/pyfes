@@ -12,6 +12,7 @@ from lxml import etree
 from . import validators
 from . import errors
 from .namespaces import namespaces
+from .base import PyfesBase
 
 
 logger = logging.getLogger(__name__)
@@ -27,20 +28,15 @@ class ExpressionParser(object):
         expression_classes = [ValueReference, Literal, Function]
         current = 0
         while instance is None and current < len(expression_classes):
-            instance = expression_classes[current].deserialize(expression)
+            instance = expression_classes[current].from_xml(expression)
             current += 1
         return instance
 
 
-class Expression(object):
+class Expression(PyfesBase):
     XML_ENTITY_NAME = ""
 
-    def serialize(self, as_string=True):
-        """Serialize to XML"""
-        result = self._serialize()
-        if as_string:
-            result = etree.tostring(result, pretty_print=True)
-        return result
+    pass
 
 
 class ValueReference(Expression):
@@ -69,7 +65,7 @@ class ValueReference(Expression):
     def __init__(self, value):
         self.value = value
 
-    def _serialize(self):
+    def _to_xml(self):
         element = etree.Element(
             "{{{}}}{}".format(namespaces["fes"], self.XML_ENTITY_NAME),
             nsmap=namespaces
@@ -78,15 +74,17 @@ class ValueReference(Expression):
         return element
 
     @classmethod
-    def deserialize(cls, expression):
-        instance = None
+    def _from_xml(cls, expression):
+        instance = None 
         qname = etree.QName(expression)
-        if qname.namespace == namespaces.get("fes") and \
-                qname.localname == cls.XML_ENTITY_NAME:
+        if qname.localname == cls.XML_ENTITY_NAME:
             instance = cls(expression.text)
         else:
-            logger.error("Invalid {}: {}".format(cls.__name__, expression))
+            logger.debug("Invalid {}: {}".format(cls.__name__, expression))
         return instance
+
+    def __repr__(self):
+        return ("{0}.{1.__class__.__name__}({1.value})".format(__name__, self))
 
 
 class Literal(Expression):
@@ -111,7 +109,7 @@ class Literal(Expression):
         self.value = value
         self.type_ = type_
 
-    def _serialize(self):
+    def _to_xml(self):
         element = etree.Element(
             "{{{}}}{}".format(namespaces["fes"], self.XML_ENTITY_NAME),
             nsmap=namespaces
@@ -122,15 +120,18 @@ class Literal(Expression):
         return element
 
     @classmethod
-    def deserialize(cls, expression):
+    def _from_xml(cls, expression):
         instance = None
         qname = etree.QName(expression)
-        if qname.namespace == namespaces.get("fes") and \
-                qname.localname == cls.XML_ENTITY_NAME:
+        if qname.localname == cls.XML_ENTITY_NAME:
             instance = cls(expression.text, expression.attrib.get("type"))
         else:
             logger.debug("Invalid {}: {}".format(cls.__name__, expression))
         return instance
+
+    def __repr__(self):
+        return ("{0}.{1.__class__.__name__}({1.value}, "
+                "type_={1.type_})".format(__name__, self))
 
 
 class Function(Expression):

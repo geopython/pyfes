@@ -7,10 +7,10 @@ standard. Please refer to Section 7 - Filter for more details.
 
 from __future__ import absolute_import
 import logging
+
 from lxml import etree
 
-from ..expression import Expression
-from .. import errors
+from ..schemaparsers import schema_parser
 from .. import utils
 
 logger = logging.getLogger(__name__)
@@ -25,14 +25,34 @@ class Operator(object):
             result = etree.tostring(result, pretty_print=True)
         return result
 
+    def _from_xml(self, xml_element):
+        """Reimplement this in child classes.
+
+        :arg xml_element: the already validated XML
+        :type xml_element: etree.Element
+        """
+
+        raise NotImplementedError
+
     @classmethod
-    def from_xml(cls, xml_element):
+    def from_xml(cls, xml_element, schema_path=None, validate_xml=True):
         """Return a new instance by parsing the input XML
+
+        Child classes should not reimplement this method. They should
+        reimplement `_from_xml` instead.
 
         The default implementation does nothing so this method must be
         reimplemented in child classes.
         """
-        return None
+
+        if validate_xml:
+            if schema_path is not None:
+                schema_parser.parse_schema(schema_path)
+            try:
+                schema_parser.validate_xml(xml_element)
+            except etree.DocumentInvalid:
+                raise
+        return cls._from_xml(xml_element)
 
     @classmethod
     def from_ogc_common(cls, expression):
@@ -41,7 +61,7 @@ class Operator(object):
         The default implementation does nothing so this method must be
         reimplemented in child classes.
         """
-        return None
+        raise NotImplementedError
 
 
 class IdOperator(Operator):

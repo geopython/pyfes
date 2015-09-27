@@ -42,23 +42,6 @@ class BoundaryType(Enum):
     upper = "UpperBoundary"
 
 
-class OperatorParser(object):
-    """A factory for generating Operator objects by deserializing from XML.
-    """
-
-    @classmethod
-    def parse(cls, operator):
-        instance = None
-        operator_classes = [BinaryComparisonOperator, LikeOperator,
-                            BetweenComparisonOperator, NullOperator,
-                            NillOperator]
-        current = 0
-        while instance is None and current < len(operator_classes):
-            instance = operator_classes[current].from_xml(operator)
-            current += 1
-        return instance
-
-
 class BinaryComparisonOperator(base.BinaryComparisonWithTwoExpressions):
     _operator_type = None
     _match_action = MatchAction.any_
@@ -88,50 +71,46 @@ class BinaryComparisonOperator(base.BinaryComparisonWithTwoExpressions):
 
     def __init__(self, first_expression, second_expression,
                  operator_type, match_case=True,
-                 match_action=MatchAction.any_):
+                 match_action="any"):
         super(BinaryComparisonOperator, self).__init__(first_expression,
                                                        second_expression)
         self.match_case = match_case
-        self.match_action = match_action
+        self.match_action = MatchAction(match_action)
         self.operator_type = operator_type
 
     @classmethod
-    def from_xml(cls, operator_element):
+    def _from_xml(cls, operator_element):
         """Create a new object from an XML element"""
-        instance = None
-        qname = etree.QName(operator_element)
-        if qname.namespace == namespaces.get("fes") and \
-                qname.localname in [m.value for m in BinaryComparisonName]:
-            instance = cls(
-                ExpressionParser.parse(operator_element[0]),
-                ExpressionParser.parse(operator_element[1]),
-                operator_type=BinaryComparisonName(qname.localname),
-                match_case=operator_element.get("matchCase", True),
-                match_action=operator_element.get("matchAction",
-                                                  MatchAction.any_)
-            )
-        else:
-            logger.error("Invalid {}: {}".format(cls.__name__,
-                                                 operator_element))
-        return instance
+        operator_type = etree.QName(operator_element).localname
+        return cls(
+            ExpressionParser.parse(operator_element[0]),
+            ExpressionParser.parse(operator_element[1]),
+            operator_type=BinaryComparisonName(operator_type),
+            match_case=operator_element.get("matchCase") == "true",
+            match_action=operator_element.get("matchAction", MatchAction.any_)
+        )
 
-    def _serialize(self):
+    def _to_xml(self):
         element = etree.Element(
             "{{{}}}{}".format(namespaces["fes"], self.operator_type.value),
             matchCase="true" if self.match_case else "false",
             matchAction=self.match_action.value, nsmap=namespaces
         )
-        first_expression_element = self.first_expression.serialize(
+        first_expression_element = self.first_expression.to_xml(
             as_string=False)
         element.append(first_expression_element)
-        second_expression_element = self.second_expression.serialize(
+        second_expression_element = self.second_expression.to_xml(
             as_string=False)
         element.append(second_expression_element)
         return element
 
+    def __repr__(self):
+        return ("{0}.{1.__class__.__name__}({1.first_expression}, "
+                "{1.second_expression}, {1.operator_type}, {1.match_case}, "
+                "{1.match_action})".format(__name__, self))
+
 
 class LikeOperator(base.BinaryComparisonWithTwoExpressions):
-    XML_ENTITY_NAME = "PropertyIsLike"
     wild_card = ""
     single_char = ""
     escape_char = ""
@@ -144,27 +123,19 @@ class LikeOperator(base.BinaryComparisonWithTwoExpressions):
         self.escape_char = escape_char
 
     @classmethod
-    def from_xml(cls, operator_element):
+    def _from_xml(cls, operator_element):
         """Create a new object from an XML element"""
-        instance = None
-        qname = etree.QName(operator_element)
-        if qname.namespace == namespaces.get("fes") and \
-                qname.localname == cls.XML_ENTITY_NAME:
-            instance = cls(
-                ExpressionParser.parse(operator_element[0]),
-                ExpressionParser.parse(operator_element[1]),
-                wild_card=operator_element.get("wildCard"),
-                single_char=operator_element.get("singleChar"),
-                escape_char=operator_element.get("escapeChar")
-            )
-        else:
-            logger.error("Invalid {}: {}".format(cls.__name__,
-                                                 operator_element))
-        return instance
+        return cls(
+            ExpressionParser.parse(operator_element[0]),
+            ExpressionParser.parse(operator_element[1]),
+            wild_card=operator_element.get("wildCard"),
+            single_char=operator_element.get("singleChar"),
+            escape_char=operator_element.get("escapeChar")
+        )
 
     def _serialize(self):
         element = etree.Element(
-            "{{{}}}{}".format(namespaces["fes"], self.XML_ENTITY_NAME),
+            "{{{}}}{}".format(namespaces["fes"], "PropertyIsLike"),
             wildCard=self.wild_card, singleChar=self.single_char,
             escapeChar=self.escape_char, nsmap=namespaces
         )
@@ -220,6 +191,7 @@ class Boundary(object):
             result = element
         return result
 
+    # FIXME - Improve validation by using the schema_parser
     @classmethod
     def from_xml(cls, boundary_element):
         """Create a new object from an XML element"""
@@ -241,7 +213,6 @@ class BetweenComparisonOperator(base.BinaryComparisonWithOneExpression):
     The lower and upper boundaries are inclusive.
     """
 
-    XML_ENTITY_NAME = "PropertyIsBetween"
     _lower_boundary = None
     _upper_boundary = None
 
@@ -271,25 +242,17 @@ class BetweenComparisonOperator(base.BinaryComparisonWithOneExpression):
         self.upper_boundary = upper_boundary
 
     @classmethod
-    def from_xml(cls, operator_element):
+    def _from_xml(cls, operator_element):
         """Create a new object from an XML element"""
-        instance = None
-        qname = etree.QName(operator_element)
-        if qname.namespace == namespaces.get("fes") and \
-                qname.localname == cls.XML_ENTITY_NAME:
-            instance = cls(
-                ExpressionParser.parse(operator_element[0]),
-                Boundary.deserialize(operator_element[1]),
-                Boundary.deserialize(operator_element[2])
-            )
-        else:
-            logger.error("Invalid {}: {}".format(cls.__name__,
-                                                 operator_element))
-        return instance
+        return cls(
+            ExpressionParser.parse(operator_element[0]),
+            Boundary.from_xml(operator_element[1]),
+            Boundary.from_xml(operator_element[2])
+        )
 
     def _serialize(self):
         element = etree.Element(
-            "{{{}}}{}".format(namespaces["fes"], self.XML_ENTITY_NAME),
+            "{{{}}}{}".format(namespaces["fes"], "PropertyIsBetween"),
             nsmap=namespaces
         )
         expression_element = self.expression.serialize(as_string=False)
