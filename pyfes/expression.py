@@ -75,7 +75,7 @@ class ValueReference(Expression):
 
     @classmethod
     def _from_xml(cls, expression):
-        instance = None 
+        instance = None
         qname = etree.QName(expression)
         if qname.localname == cls.XML_ENTITY_NAME:
             instance = cls(expression.text)

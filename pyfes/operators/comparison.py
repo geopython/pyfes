@@ -55,6 +55,7 @@ class BinaryComparisonOperator(base.BinaryComparisonWithTwoExpressions):
     def operator_type(self, type_):
         if type_ in (BinaryComparisonName):
             self._operator_type = type_
+            self._name = BinaryComparisonName[type_]
         else:
             raise errors.InvalidOperatorError()
 
@@ -92,7 +93,7 @@ class BinaryComparisonOperator(base.BinaryComparisonWithTwoExpressions):
 
     def _to_xml(self):
         element = etree.Element(
-            "{{{}}}{}".format(namespaces["fes"], self.operator_type.value),
+            "{{{}}}{}".format(namespaces["fes"], self.name),
             matchCase="true" if self.match_case else "false",
             matchAction=self.match_action.value, nsmap=namespaces
         )
@@ -111,6 +112,7 @@ class BinaryComparisonOperator(base.BinaryComparisonWithTwoExpressions):
 
 
 class LikeOperator(base.BinaryComparisonWithTwoExpressions):
+    _name = "PropertyIsLike"
     wild_card = ""
     single_char = ""
     escape_char = ""
@@ -133,9 +135,9 @@ class LikeOperator(base.BinaryComparisonWithTwoExpressions):
             escape_char=operator_element.get("escapeChar")
         )
 
-    def _serialize(self):
+    def _to_xml(self):
         element = etree.Element(
-            "{{{}}}{}".format(namespaces["fes"], "PropertyIsLike"),
+            "{{{}}}{}".format(namespaces["fes"], self.name),
             wildCard=self.wild_card, singleChar=self.single_char,
             escapeChar=self.escape_char, nsmap=namespaces
         )
@@ -156,7 +158,7 @@ class Boundary(object):
 
     @property
     def expression(self):
-        return self.expression
+        return self._expression
 
     @expression.setter
     def expression(self, new_expression):
@@ -178,13 +180,13 @@ class Boundary(object):
         self.expression = expression
         self.type_ = type_
 
-    def serialize(self, as_string=True):
+    def to_xml(self, as_string=True):
         element = etree.Element(
             "{{{}}}{}".format(namespaces["fes"], self.type_.value)
         )
-        expression_element = self.expression.serialize(
+        expression_element = self.expression.to_xml(
             as_string=False)
-        element.append(first_expression_element)
+        element.append(expression_element)
         if as_string:
             result = etree.tostring(element, pretty_print=True)
         else:
@@ -199,7 +201,7 @@ class Boundary(object):
         qname = etree.QName(boundary_element)
         if qname.namespace == namespaces.get("fes") and \
                 qname.localname in [m.value for m in BoundaryType]:
-            instance = cls(ExpressionParser.parse(operator_element[0]),
+            instance = cls(ExpressionParser.parse(boundary_element[0]),
                            BoundaryType(qname.localname))
         else:
             logger.error("Invalid {}: {}".format(cls.__name__,
@@ -213,6 +215,7 @@ class BetweenComparisonOperator(base.BinaryComparisonWithOneExpression):
     The lower and upper boundaries are inclusive.
     """
 
+    _name = "PropertyIsBetween"
     _lower_boundary = None
     _upper_boundary = None
 
@@ -250,27 +253,28 @@ class BetweenComparisonOperator(base.BinaryComparisonWithOneExpression):
             Boundary.from_xml(operator_element[2])
         )
 
-    def _serialize(self):
+    def _to_xml(self):
         element = etree.Element(
-            "{{{}}}{}".format(namespaces["fes"], "PropertyIsBetween"),
+            "{{{}}}{}".format(namespaces["fes"], self.name),
             nsmap=namespaces
         )
-        expression_element = self.expression.serialize(as_string=False)
+        expression_element = self.expression.to_xml(as_string=False)
         element.append(expression_element)
-        lower_boundary_element = self.lower_boundary.serialize(as_string=False)
+        lower_boundary_element = self.lower_boundary.to_xml(as_string=False)
         element.append(lower_boundary_element)
-        upper_boundary_element = self.upper_boundary.serialize(as_string=False)
+        upper_boundary_element = self.upper_boundary.to_xml(as_string=False)
         element.append(upper_boundary_element)
         return element
 
 
 class NullOperator(base.BinaryComparisonWithOneExpression):
     """Tests the specified property to see if it exists in the resource."""
-    pass
+    _name = "PropertyIsNull"
 
 
 class NillOperator(base.BinaryComparisonWithOneExpression):
     """Tests the content of specified property to see if it is nill."""
+    _name = "PropertyIsNil"
     nill_reason = ""
 
     def __init__(self, expression, nill_reason=""):

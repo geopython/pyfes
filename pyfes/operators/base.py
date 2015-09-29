@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class Operator(object):
+    _name = None
+
+    @property
+    def name(self):
+        return self._name
 
     def to_xml(self, as_string=True):
         """Serialize to XML"""
