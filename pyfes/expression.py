@@ -84,7 +84,7 @@ class ValueReference(Expression):
         return instance
 
     def __repr__(self):
-        return ("{0}.{1.__class__.__name__}({1.value})".format(__name__, self))
+        return ("{0}.{1.__class__.__name__}({1.value!r})".format(__name__, self))
 
 
 class Literal(Expression):
@@ -130,8 +130,8 @@ class Literal(Expression):
         return instance
 
     def __repr__(self):
-        return ("{0}.{1.__class__.__name__}({1.value}, "
-                "type_={1.type_})".format(__name__, self))
+        return ("{0}.{1.__class__.__name__}({1.value!r}, "
+                "type_={1.type_!r})".format(__name__, self))
 
 
 class Function(Expression):

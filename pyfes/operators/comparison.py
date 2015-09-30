@@ -79,6 +79,11 @@ class BinaryComparisonOperator(base.BinaryComparisonWithTwoExpressions):
         self.match_action = MatchAction(match_action)
         self.operator_type = operator_type
 
+    def __repr__(self):
+        return ("{0}.{1.__class__.__name__}({1.first_expression!r}, "
+                "{1.second_expression!r}, {1.operator_type!r}, "
+                "{1.match_case!r}, {1.match_action!r})".format(__name__, self))
+
     @classmethod
     def _from_xml(cls, operator_element):
         """Create a new object from an XML element"""
@@ -105,11 +110,6 @@ class BinaryComparisonOperator(base.BinaryComparisonWithTwoExpressions):
         element.append(second_expression_element)
         return element
 
-    def __repr__(self):
-        return ("{0}.{1.__class__.__name__}({1.first_expression}, "
-                "{1.second_expression}, {1.operator_type}, {1.match_case}, "
-                "{1.match_action})".format(__name__, self))
-
 
 class LikeOperator(base.BinaryComparisonWithTwoExpressions):
     _name = "PropertyIsLike"
@@ -123,6 +123,11 @@ class LikeOperator(base.BinaryComparisonWithTwoExpressions):
         self.wild_card = wild_card
         self.single_char = single_char
         self.escape_char = escape_char
+
+    def __repr__(self):
+        return ("{0}.{1.__class__.__name__}({1.first_expression!r}, "
+                "{1.second_expression!r}, {1.wild_card!r}, {1.single_char!r}, "
+                "{1.escape_char!r})".format(__name__, self))
 
     @classmethod
     def _from_xml(cls, operator_element):
@@ -179,6 +184,10 @@ class Boundary(object):
     def __init__(self, expression, type_):
         self.expression = expression
         self.type_ = type_
+
+    def __repr__(self):
+        return ("{0}.{1.__class__.__name__}({1.expression!r, "
+                "1.type_!r})".format(__name__, self))
 
     def to_xml(self, as_string=True):
         element = etree.Element(
@@ -244,6 +253,11 @@ class BetweenComparisonOperator(base.BinaryComparisonWithOneExpression):
         self.lower_boundary = lower_boundary
         self.upper_boundary = upper_boundary
 
+    def __repr__(self):
+        return ("{0}.{1.__class__.__name__}({1.expression!r}, "
+                "{1.lower_boundary!r}, {1.upper_boundary!r})".format(
+                    __name__, self))
+
     @classmethod
     def _from_xml(cls, operator_element):
         """Create a new object from an XML element"""
@@ -271,12 +285,51 @@ class NullOperator(base.BinaryComparisonWithOneExpression):
     """Tests the specified property to see if it exists in the resource."""
     _name = "PropertyIsNull"
 
+    def __repr__(self):
+        return ("{0}.{1.__class__.__name__}({1.expression!r})".format(
+            __name__, self))
+
+    @classmethod
+    def _from_xml(cls, operator_element):
+        """Create a new object from an XML element"""
+        return cls(ExpressionParser.parse(operator_element[0]))
+
+    def _to_xml(self):
+        element = etree.Element(
+            "{{{}}}{}".format(namespaces["fes"], self.name),
+            nsmap=namespaces
+        )
+        expression_element = self.expression.to_xml(as_string=False)
+        element.append(expression_element)
+        return element
+
 
 class NillOperator(base.BinaryComparisonWithOneExpression):
     """Tests the content of specified property to see if it is nill."""
     _name = "PropertyIsNil"
-    nill_reason = ""
+    nil_reason = "equals"
 
-    def __init__(self, expression, nill_reason=""):
+    def __init__(self, expression, nill_reason=None):
         super(NillOperator, self).__init__(expression)
-        self.nill_reason = nill_reason
+        self.nill_reason = nill_reason or "equals"
+
+    def __repr__(self):
+        return ("{0}.{1.__class__.__name__}({1.expression!r}, "
+                "{1.nil_reason!r})".format(__name__, self))
+
+    @classmethod
+    def _from_xml(cls, operator_element):
+        """Create a new object from an XML element"""
+        return cls(
+            ExpressionParser.parse(operator_element[0]),
+            nil_reason=operator_element.get("nilReason")
+        )
+
+    def _to_xml(self):
+        element = etree.Element(
+            "{{{}}}{}".format(namespaces["fes"], self.name),
+            nilReason=self.nil_reason, nsmap=namespaces
+        )
+        expression_element = self.expression.to_xml(as_string=False)
+        element.append(expression_element)
+        return element
