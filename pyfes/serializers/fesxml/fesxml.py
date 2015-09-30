@@ -8,8 +8,8 @@ import logging
 from lxml import etree
 
 from . import operatorserializers
-from ..namespaces import namespaces
-from ..operators import comparison
+from ...namespaces import namespaces
+from ...operators import comparison
 
 logger = logging.getLogger(__name__)
 

@@ -7,8 +7,8 @@ import logging
 from lxml import etree
 
 from ...namespaces import namespaces
-from ..expression import ExpressionParser
-from ..operators import comparison
+from ...expression import ExpressionParser
+from ...operators import comparison
 
 logger = logging.getLogger(__name__)
 

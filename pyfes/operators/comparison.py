@@ -55,7 +55,7 @@ class BinaryComparisonOperator(base.BinaryComparisonWithTwoExpressions):
     def operator_type(self, type_):
         if type_ in (BinaryComparisonName):
             self._operator_type = type_
-            self._name = BinaryComparisonName[type_]
+            self._name = type_.value
         else:
             raise errors.InvalidOperatorError()
 
