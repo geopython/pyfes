@@ -22,7 +22,10 @@ class OperatorParser(object):
         ]
         current = 0
         while instance is None and current < len(operator_classes):
-            instance = operator_classes[current].from_xml(
-                operator, schema_path=schema_path)
+            try:
+                instance = operator_classes[current].from_xml(
+                    operator, schema_path=schema_path)
+            except Exception as err:  # use a more specific exception
+                logger.debug(err)
             current += 1
         return instance
