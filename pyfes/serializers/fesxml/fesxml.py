@@ -9,7 +9,7 @@ from lxml import etree
 
 from . import operatorserializers
 from ...namespaces import namespaces
-from ...operators import comparison
+from ...types import Filter
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +19,8 @@ class FilterSerializer(object):
     @classmethod
     def serialize(cls, filter_):
         """Serialize the input filter to XML"""
-        element = etree.Element(
-            "{{{0[fes]}}}Filter".format(namespaces), nsmap=namespaces)
+        element = etree.Element("{{{0[fes]}}}{1}".format(namespaces,
+                                type(filter_).__name__, nsmap=namespaces))
         serialized_operator = OperatorSerializer.serialize(filter_.filter_)
         element.append(serialized_operator)
         return element
@@ -28,7 +28,7 @@ class FilterSerializer(object):
     @classmethod
     def deserialize(cls, xml_element):
         """Deserialize the input XML to a pyfes.Filter"""
-        raise NotImplementedError
+        return Filter(OperatorSerializer.deserialize(xml_element[1]))
 
 
 class OperatorSerializer(object):
