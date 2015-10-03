@@ -9,7 +9,7 @@ from collections import namedtuple
 ValueReference = namedtuple("ValueReference", "value")
 Literal = namedtuple("Literal", "value type_")
 Literal.__new__.__defaults__ = ("string",)
-Function = namedtuple("Function", "name expressions")
+Function = namedtuple("Function", "name arguments")
 Function.__new__.__defaults__ = ([],)
 
 # comparison operators
