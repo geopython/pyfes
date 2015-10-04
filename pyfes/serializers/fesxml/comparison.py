@@ -9,7 +9,7 @@ from lxml import etree
 from ... import types
 from ...namespaces import namespaces
 from .base import BaseSerializer
-from .expression import ExpressionSerializer
+from .fesxml import FesXmlSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +22,8 @@ class BinaryOperatorSerializer(BaseSerializer):
         if xml_element.get("matchCase", "true") == "true":
             match_case = True
         return cls.TYPE_(
-            first_expression=ExpressionSerializer.deserialize(xml_element[0]),
-            second_expression=ExpressionSerializer.deserialize(xml_element[1]),
+            first_expression=FesXmlSerializer.deserialize(xml_element[0]),
+            second_expression=FesXmlSerializer.deserialize(xml_element[1]),
             match_case=match_case,
             match_action=xml_element.get("matchAction")
         )
@@ -35,10 +35,10 @@ class BinaryOperatorSerializer(BaseSerializer):
             matchCase="true" if operator.match_case else "false",
             matchAction=operator.match_action, nsmap=namespaces
         )
-        first = ExpressionSerializer.serialize(operator.first_expression,
-                                               as_string=False)
-        second = ExpressionSerializer.serialize(operator.second_expression,
-                                                as_string=False)
+        first = FesXmlSerializer.serialize(operator.first_expression,
+                                           as_string=False)
+        second = FesXmlSerializer.serialize(operator.second_expression,
+                                            as_string=False)
         xml_element.append(first)
         xml_element.append(second)
         return xml_element
@@ -74,8 +74,8 @@ class PropertyIsLikeSerializer(BaseSerializer):
     @classmethod
     def _deserialize(cls, xml_element):
         return cls.TYPE_(
-            first_expression=ExpressionSerializer.deserialize(xml_element[0]),
-            second_expression=ExpressionSerializer.deserialize(xml_element[1]),
+            first_expression=FesXmlSerializer.deserialize(xml_element[0]),
+            second_expression=FesXmlSerializer.deserialize(xml_element[1]),
             wild_card=xml_element.get("wildCard"),
             single_char=xml_element.get("singleChar"),
             escape_char=xml_element.get("escapeChar")
@@ -88,10 +88,87 @@ class PropertyIsLikeSerializer(BaseSerializer):
             wildCard=operator.wild_card, singleChar=operator.single_char,
             escapeChar=operator.escape_char, nsmap=namespaces
         )
-        first = ExpressionSerializer.serialize(operator.first_expression,
-                                               as_string=False)
-        second = ExpressionSerializer.serialize(operator.second_expression,
-                                                as_string=False)
+        first = FesXmlSerializer.serialize(operator.first_expression,
+                                           as_string=False)
+        second = FesXmlSerializer.serialize(operator.second_expression,
+                                            as_string=False)
         xml_element.append(first)
         xml_element.append(second)
         return xml_element
+
+
+class BoundarySerializer(BaseSerializer):
+    TYPE_ = types.Boundary
+    EXTRA_TYPE_NAMES = ["LowerBoundary", "UpperBoundary"]
+
+    @classmethod
+    def _deserialize(cls, xml_element):
+        return cls.TYPE_(
+            expression=FesXmlSerializer.deserialize(xml_element[0]))
+
+    @classmethod
+    def _serialize(cls, boundary, tag_name=None):
+        tag_name = tag_name or boundary.__class__.__name__
+        xml_element = etree.Element(
+            "{{{0[fes]}}}{1}".format(namespaces, tag_name),
+            nsmap=namespaces
+        )
+        xml_element.append(FesXmlSerializer.serialize(boundary.expression,
+                                                      as_string=False))
+        return xml_element
+
+
+class PropertyIsBetweenSerializer(BaseSerializer):
+    TYPE_ = types.PropertyIsBetween
+
+    @classmethod
+    def _deserialize(cls, xml_element):
+        return cls.TYPE_(
+            expression=FesXmlSerializer.deserialize(xml_element[0]),
+            lower_boundary=types.Boundary(
+                FesXmlSerializer.deserialize(xml_element[1])),
+            upper_boundary=types.Boundary(
+                FesXmlSerializer.deserialize(xml_element[2])),
+        )
+
+    @classmethod
+    def _serialize(cls, operator):
+        xml_element = etree.Element(
+            "{{{0[fes]}}}{1.__class__.__name__}".format(namespaces, operator),
+            nsmap=namespaces
+        )
+        xml_element.append(FesXmlSerializer.serialize(operator.expression,
+                                                      as_string=False))
+        xml_element.append(
+            BoundarySerializer.serialize(operator.lower_boundary,
+                                         as_string=False,
+                                         tag_name="LowerBoundary"))
+        xml_element.append(
+            BoundarySerializer.serialize(operator.upper_boundary,
+                                         as_string=False,
+                                         tag_name="UpperBoundary"))
+        return xml_element
+
+
+class PropertyIsNullSerializer(BaseSerializer):
+    TYPE_ = types.PropertyIsNull
+
+    @classmethod
+    def _deserialize(cls, xml_element):
+        return cls.TYPE_(expression=xml_element[0])
+
+    @classmethod
+    def _serialize(cls, operator):
+        return None
+
+
+class PropertyIsNilSerializer(BaseSerializer):
+    TYPE_ = types.PropertyIsNil
+
+    @classmethod
+    def _deserialize(cls, xml_element):
+        return None
+
+    @classmethod
+    def _serialize(cls, operator):
+        return None

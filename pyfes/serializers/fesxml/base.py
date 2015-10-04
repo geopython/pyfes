@@ -18,7 +18,10 @@ class BaseSerializer(object):
         if isinstance(xml_element, basestring):
             xml_element = etree.fromstring(xml_element)
         # then validate the xml_element with the fes2_0 schema, if needed
-        if etree.QName(xml_element).localname != cls.TYPE_.__name__:
+        tag = etree.QName(xml_element).localname
+        type_matches = tag == cls.TYPE_.__name__
+        in_extra_type_names = tag in getattr(cls, "EXTRA_TYPE_NAMES", [])
+        if not type_matches and not in_extra_type_names:
             raise Exception  # use a more specific exception
         return cls._deserialize(xml_element)
 
@@ -27,8 +30,8 @@ class BaseSerializer(object):
         raise NotImplementedError
 
     @classmethod
-    def serialize(cls, fes_element, as_string=True):
-        result = cls._serialize(fes_element)
+    def serialize(cls, fes_element, as_string=True, **kwargs):
+        result = cls._serialize(fes_element, **kwargs)
         if as_string:
             result = etree.tostring(result, pretty_print=True)
         return result
