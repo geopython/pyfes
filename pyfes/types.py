@@ -51,8 +51,9 @@ Boundary = namedtuple("Boundary", "expression")
 PropertyIsBetween = namedtuple("PropertyIsBetween",
                                "expression lower_boundary upper_boundary")
 PropertyIsNull = namedtuple("PropertyIsNull", "expression")
+PropertyIsNull.__new__.__defaults__ = (None,)
 PropertyIsNil = namedtuple("PropertyIsNil", "expression nil_reason")
-PropertyIsNil.__new__.__defaults__ = ("equals",)
+PropertyIsNil.__new__.__defaults__ = (None, "equals",)
 
 # spatial operators
 Beyond = namedtuple("Beyond", "value_reference geometry distance")

@@ -155,11 +155,23 @@ class PropertyIsNullSerializer(BaseSerializer):
 
     @classmethod
     def _deserialize(cls, xml_element):
-        return cls.TYPE_(expression=xml_element[0])
+        if len(xml_element) >= 1:
+            result = cls.TYPE_(
+                expression=FesXmlSerializer.deserialize(xml_element[0]))
+        else:
+            result = cls.TYPE_()
+        return result
 
     @classmethod
     def _serialize(cls, operator):
-        return None
+        xml_element = etree.Element(
+            "{{{0[fes]}}}{1.__class__.__name__}".format(namespaces, operator),
+            nsmap=namespaces
+        )
+        if operator.expression is not None:
+            xml_element.append(FesXmlSerializer.serialize(operator.expression,
+                                                          as_string=False))
+        return xml_element
 
 
 class PropertyIsNilSerializer(BaseSerializer):
@@ -167,8 +179,23 @@ class PropertyIsNilSerializer(BaseSerializer):
 
     @classmethod
     def _deserialize(cls, xml_element):
-        return None
+        nil_reason = xml_element.get("nilReason", "equals")
+        if len(xml_element) >= 1:
+            result = cls.TYPE_(
+                expression=FesXmlSerializer.deserialize(xml_element[0]),
+                nil_reason=nil_reason
+            )
+        else:
+            result = cls.TYPE_(nil_reason=nil_reason)
+        return result
 
     @classmethod
     def _serialize(cls, operator):
-        return None
+        xml_element = etree.Element(
+            "{{{0[fes]}}}{1.__class__.__name__}".format(namespaces, operator),
+            nilReason=operator.nil_reason, nsmap=namespaces
+        )
+        if operator.expression is not None:
+            xml_element.append(FesXmlSerializer.serialize(operator.expression,
+                                                          as_string=False))
+        return xml_element
