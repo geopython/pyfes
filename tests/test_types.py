@@ -113,8 +113,26 @@ class TestTypes(TestCase):
     def test_should_create_temporal_operators(self):
         raise NotImplementedError
 
-    def test_should_create_logical_operators(self):
-        raise NotImplementedError
+    def test_should_create_binary_logical_operators(self):
+        first_predicate = types.PropertyIsLessThan(self.value_reference,
+                                                   self.literal)
+        second_predicate = types.PropertyIsEqualTo(self.value_reference,
+                                                   self.literal)
+        for op_type in (types.And, types.Or):
+            op1 = op_type(first_predicate, second_predicate)
+            eq_(op1.first_predicate, first_predicate)
+            eq_(op1.second_predicate, second_predicate)
+            eq_(op1.extra_predicates, None)
+            op2 = op_type(first_predicate, second_predicate,
+                          [first_predicate])
+            eq_(len(op2.extra_predicates), 1)
+            eq_(op2.extra_predicates[0], first_predicate)
+
+    def test_should_create_logical_Not_operator(self):
+        predicate = types.PropertyIsLessThan(self.value_reference,
+                                             self.literal)
+        op1 = types.Not(predicate)
+        eq_(op1.filter_predicate, predicate)
 
     def test_should_create_ResourceId_operator(self):
         raise NotImplementedError

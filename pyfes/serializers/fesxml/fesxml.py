@@ -37,6 +37,9 @@ class FesXmlSerializer(object):
             ".comparison.PropertyIsBetweenSerializer",
         types.PropertyIsNull.__name__: ".comparison.PropertyIsNullSerializer",
         types.PropertyIsNil.__name__: ".comparison.PropertyIsNilSerializer",
+        types.And.__name__: ".logical.AndSerializer",
+        types.Or.__name__: ".logical.OrSerializer",
+        types.Not.__name__: ".logical.NotSerializer",
     }
 
     @classmethod

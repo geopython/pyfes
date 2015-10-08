@@ -97,9 +97,11 @@ EndedBy = namedtuple("EndedBy", "value_reference temporal_operand")
 AnyInteracts = namedtuple("AnyInteracts", "value_reference temporal_operand")
 
 # logical operators
-And = namedtuple("And", "first_operand second_operand")
-Or = namedtuple("Or", "first_operand second_operand")
-Not = namedtuple("Not", "operand")
+And = namedtuple("And", "first_predicate second_predicate extra_predicates")
+And.__new__.__defaults__ = (None,)
+Or = namedtuple("Or", "first_predicate second_predicate extra_predicates")
+Or.__new__.__defaults__ = (None,)
+Not = namedtuple("Not", "filter_predicate")
 
 # identifier operators
 Version = namedtuple("Version", "version_action_token index timestamp")
