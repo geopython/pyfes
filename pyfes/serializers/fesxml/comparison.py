@@ -14,7 +14,7 @@ from .fesxml import FesXmlSerializer
 logger = logging.getLogger(__name__)
 
 
-class BinaryOperatorSerializer(BaseSerializer):
+class BinaryComparisonOperatorSerializer(BaseSerializer):
 
     @classmethod
     def _deserialize(cls, xml_element):
@@ -44,27 +44,29 @@ class BinaryOperatorSerializer(BaseSerializer):
         return xml_element
 
 
-class PropertyIsEqualToSerializer(BinaryOperatorSerializer):
+class PropertyIsEqualToSerializer(BinaryComparisonOperatorSerializer):
     TYPE_ = types.PropertyIsEqualTo
 
 
-class PropertyIsNotEqualToSerializer(BinaryOperatorSerializer):
+class PropertyIsNotEqualToSerializer(BinaryComparisonOperatorSerializer):
     TYPE_ = types.PropertyIsNotEqualTo
 
 
-class PropertyIsLessThanSerializer(BinaryOperatorSerializer):
+class PropertyIsLessThanSerializer(BinaryComparisonOperatorSerializer):
     TYPE_ = types.PropertyIsLessThan
 
 
-class PropertyIsGreaterThanSerializer(BinaryOperatorSerializer):
+class PropertyIsGreaterThanSerializer(BinaryComparisonOperatorSerializer):
     TYPE_ = types.PropertyIsGreaterThan
 
 
-class PropertyIsLessThanOrEqualToSerializer(BinaryOperatorSerializer):
+class PropertyIsLessThanOrEqualToSerializer(
+        BinaryComparisonOperatorSerializer):
     TYPE_ = types.PropertyIsLessThanOrEqualTo
 
 
-class PropertyIsGreaterThanOrEqualToSerializer(BinaryOperatorSerializer):
+class PropertyIsGreaterThanOrEqualToSerializer(
+        BinaryComparisonOperatorSerializer):
     TYPE_ = types.PropertyIsGreaterThanOrEqualTo
 
 
