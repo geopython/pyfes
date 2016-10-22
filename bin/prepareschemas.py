@@ -1,5 +1,10 @@
 """
 Prepare the XML Schemas used by pyfes in order to allow schema validation
+
+fes requires the following schemas:
+
+* http://www.w3.org/2001/xml.xsd
+* http://schemas.opengis.net/ows/1.1.0/owsAll.xsd
 """
 
 import os
