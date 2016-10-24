@@ -61,3 +61,6 @@ target/
 
 # sublime text project files
 *.sublime-*
+
+# PyChram project files
+.idea/*

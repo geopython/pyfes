@@ -7,7 +7,7 @@ import logging
 
 from lxml import etree
 
-from ... import types
+from ... import festypes
 from ...utils import lazy_load
 
 logger = logging.getLogger(__name__)
@@ -15,31 +15,31 @@ logger = logging.getLogger(__name__)
 
 class FesXmlSerializer(object):
     serializer_map = {
-        types.ValueReference.__name__: ".expression.ValueReferenceSerializer",
-        types.Literal.__name__: ".expression.LiteralSerializer",
-        types.Function.__name__: ".expression.FunctionSerializer",
-        types.PropertyIsEqualTo.__name__:
+        festypes.ValueReference.__name__: ".expression.ValueReferenceSerializer",
+        festypes.Literal.__name__: ".expression.LiteralSerializer",
+        festypes.Function.__name__: ".expression.FunctionSerializer",
+        festypes.PropertyIsEqualTo.__name__:
             ".comparison.PropertyIsEqualToSerializer",
-        types.PropertyIsNotEqualTo.__name__:
+        festypes.PropertyIsNotEqualTo.__name__:
             ".comparison.PropertyIsNotEqualToSerializer",
-        types.PropertyIsLessThan.__name__:
+        festypes.PropertyIsLessThan.__name__:
             ".comparison.PropertyIsLessThanSerializer",
-        types.PropertyIsGreaterThan.__name__:
+        festypes.PropertyIsGreaterThan.__name__:
             ".comparison.PropertyIsGreaterThanSerializer",
-        types.PropertyIsLessThanOrEqualTo.__name__:
+        festypes.PropertyIsLessThanOrEqualTo.__name__:
             ".comparison.PropertyIsLessThanOrEqualToSerializer",
-        types.PropertyIsGreaterThanOrEqualTo.__name__:
+        festypes.PropertyIsGreaterThanOrEqualTo.__name__:
             ".comparison.PropertyIsGreaterThanOrEqualToSerializer",
-        types.PropertyIsLike.__name__: ".comparison.PropertyIsLikeSerializer",
+        festypes.PropertyIsLike.__name__: ".comparison.PropertyIsLikeSerializer",
         "LowerBoundary": ".comparison.BoundarySerializer",
         "UpperBoundary": ".comparison.BoundarySerializer",
-        types.PropertyIsBetween.__name__:
+        festypes.PropertyIsBetween.__name__:
             ".comparison.PropertyIsBetweenSerializer",
-        types.PropertyIsNull.__name__: ".comparison.PropertyIsNullSerializer",
-        types.PropertyIsNil.__name__: ".comparison.PropertyIsNilSerializer",
-        types.And.__name__: ".logical.AndSerializer",
-        types.Or.__name__: ".logical.OrSerializer",
-        types.Not.__name__: ".logical.NotSerializer",
+        festypes.PropertyIsNull.__name__: ".comparison.PropertyIsNullSerializer",
+        festypes.PropertyIsNil.__name__: ".comparison.PropertyIsNilSerializer",
+        festypes.And.__name__: ".logical.AndSerializer",
+        festypes.Or.__name__: ".logical.OrSerializer",
+        festypes.Not.__name__: ".logical.NotSerializer",
     }
 
     @classmethod

@@ -1,0 +1,360 @@
+# OGC Common Query Language EBNF definition
+#
+# This file has been adapted from:
+#
+# * Geotools' CQL design page:
+#   https://github.com/geotools/geotools/blob/master/modules/library/cql/CQL.md
+
+# * OGC CSW v.3.0.0 standard's Annex B
+#
+#
+# Since the original CQL specification is in BNF, a translation to
+# EBNF has been made. In addition to this translation, there were some
+# modifications. The main ones are:
+#
+# * Removed duplicate rules
+# * Replaced space with underscore in non-terminal's names
+# * Added quotes around terminals
+# * Replaced rule assignment character from ::= with =
+# * Removed angle brackets in the definition of non-terminals
+# * Added semicolon to the end of all rules
+# * Renamed all rules to start with lowercase, as uppercase has special meanin in grako
+# * Rewrote some rules with grako specific syntax, for increased readability
+# * Removed SQL_terminal_character rule as it is not used anywhere
+# * Renamed 'period' duplicate rule to 'temporal_period'
+# * Reformatted line breaks and white space for increased readability
+
+@@grammar :: Cql
+
+sequence_of_search_conditions = search_condition [ ';' search_condition ] ;
+
+#search_condition =  boolean_term [ 'OR' boolean_term ] ;
+search_condition =  boolean_term [ 'OR' search_condition ] ;
+
+#boolean_term = boolean_factor [ 'AND' boolean_factor ] ;
+boolean_term = boolean_factor [ 'AND' boolean_term ] ;
+
+boolean_factor = [ 'NOT' ] boolean_primary ;
+
+boolean_primary = predicate | routine_invocation ;
+
+predicate = comparison_predicate | text_predicate | null_predicate
+    | temporal_predicate | existence_predicate
+    | between_predicate | include_exclude_predicate ;
+
+existence_predicate = attribute_name 'EXISTS' | attribute_name 'DOES-NOT-EXIST' ;
+
+comparison_predicate = attribute_name comp_op expression ;
+
+comp_op = equals_operator | not_equals_operator | less_than_operator
+    | greater_than_operator | less_than_or_equals_operator
+    | greater_than_or_equals_operator ;
+
+text_predicate = attribute_name [ 'NOT' ] 'LIKE' character_pattern ;
+
+character_pattern = character_string_literal ;
+
+null_predicate = attribute_name 'IS' [ 'NOT' ] 'NULL' ;
+
+between_predicate = attribute_name [ 'NOT' ] 'BETWEEN' literal 'AND'  literal ;
+
+temporal_predicate = attribute_name "BEFORE" date_time_expression
+    | attribute_name "BEFORE OR DURING" temporal_period
+    | attribute_name "DURING" temporal_period
+    | attribute_name "DURING OR AFTER" temporal_period
+    | attribute_name "AFTER" date_time_expression ;
+
+date_time_expression = date_time | temporal_period ;
+
+date_time = full_date "T" utc_time ;
+
+full_date = date_year "-" date_month "-" date_day ;
+
+date_year = digit digit digit digit ;
+
+date_month = digit digit ;
+
+date_day = digit digit ;
+
+utc_time = time_hour ":" time_minute ":" time_second "Z" ;
+
+time_hour = digit digit ;
+
+time_minute = digit digit ;
+
+time_second = digit digit ['.' {digit}+ ] ;
+
+duration = "P" dur_date | "T" dur_time ;
+
+dur_date = dur_day | dur_month | dur_year [dur_time] ;
+
+dur_day = {digit}+ "D" ;
+
+dur_month = {digit}+ "M" [ dur_day ] ;
+
+dur_year = {digit}+ "Y" [dur_month] ;
+
+dur_time = dur_hour | dur_minute | dur_second ;
+
+dur_hour = {digit}+ "H" [dur_minute] ;
+
+dur_minute = {digit}+ "M" [dur_second] ;
+
+dur_second = {digit}+ "S" ;
+
+temporal_period = date_time "/" date_time | date_time "/" duration | duration "/" date_time ;
+
+include_exclude_predicate = "INCLUDE" | "EXCLUDE" ;
+
+expression = function | literal | attribute_name ;
+
+addition_operator= plus_sign | minus_sign ;
+
+multiplication_operator = asterisk | solidus ;
+
+function = identifier "(" [ function_arguments [ { "," function_arguments }+ ] ] ")" ;
+
+function_arguments = literal | attribute_name | expression ;
+
+literal = signed_numeric_literal | general_literal ;
+
+signed_numeric_literal = [ sign ] unsigned_numeric_literal ;
+
+general_literal = character_string_literal | boolean_literal ;
+
+boolean_literal = 'TRUE' | 'FALSE' | 'UNKNOWN' ;
+
+routine_invocation = geoop_name georoutine_argument_list
+    | relgeoop_name relgeoop_argument_list
+    | 'BBOX' bbox_argument_list ;
+
+routine_name =  attribute_name ;
+
+geoop_name = 'EQUALS' | 'DISJOINT' | 'INTERSECTS' | 'TOUCHES' | 'CROSSES'
+    | 'WITHIN' | 'CONTAINS' | 'OVERLAPS' | 'RELATE' ;
+
+bbox_argument_list= "(" attribute_name ","min_X ","min_Y ","max_X ","max_Y["," crs] ")" ;
+
+min_X = signed_numeric_literal ;
+
+min_Y = signed_numeric_literal ;
+
+max_X = signed_numeric_literal ;
+
+max_Y = signed_numeric_literal ;
+
+crs =  {} ; # default: EPSG:4326
+
+relgeoop_name = 'DWITHIN' | 'BEYOND' ;
+
+argument_list = left_paren [ positional_arguments ] right_paren ;
+
+positional_arguments = { argument }+ ;
+
+argument = literal | attribute_name ;
+
+georoutine_argument_list =  left_paren attribute_name comma geometry_literal right_paren ;
+
+relgeoop_argument_list = left_paren attribute_name comma geometry_literal comma tolerance right_paren ;
+
+tolerance =unsigned_numeric_literal comma distance_units ;
+
+distance_units = "feet" | "meters" | "statute miles" | "nautical miles" | "kilometers" ;
+
+geometry_literal = point_tagged_text | linestring_tagged_text | polygon_tagged_text
+    | multipoint_tagged_text | multilinestring_tagged_text
+    | multipolygon_tagged_text | geometrycollection_tagged_text
+    | envelope_tagged_text ;
+
+point_tagged_text = 'POINT' point_text ;
+
+linestring_tagged_text = 'LINESTRING' linestring_text ;
+
+polygon_tagged_text = 'POLYGON' polygon_text ;
+
+multipoint_tagged_text = 'MULTIPOINT' multipoint_text ;
+
+multilinestring_tagged_text = 'MULTILINESTRING' multilinestring_text ;
+
+multipolygon_tagged_text = 'MULTIPOLYGON' multipolygon_text ;
+
+geometrycollection_tagged_text ='GEOMETRYCOLLECTION' geometrycollection_text ;
+
+point_text = 'EMPTY' | '(' point ')' ;
+
+point = x ' ' y ;
+
+x = signed_numeric_literal ;
+
+y = signed_numeric_literal ;
+
+linestring_text = 'EMPTY' | '(' point { ',' point }+ ')' ;
+
+polygon_text = 'EMPTY' | '(' linestring_text { ',' linestring_text }+ ')' ;
+
+multipoint_text = 'EMPTY' | '(' point_text { ',' point_text }+ ')' ;
+
+multilinestring_text = 'EMPTY' | '(' linestring_text { ',' linestring_text }+ ')' ;
+
+multipolygon_text = 'EMPTY' | '(' polygon_text { ',' polygon_text }+ ')' ;
+
+geometrycollection_text = 'EMPTY' | '(' geometry_literal { ',' geometry_literal }+ ')' ;
+
+envelope_tagged_text = 'ENVELOPE' envelope_text ;
+
+envelope_text = 'EMPTY' | '(' westboundlongitude ',' eastboundlongitude ','
+        northboundlatitude ',' southboundlatitude ')' ;
+
+westboundlongitude = signed_numeric_literal ;
+
+eastboundlongitude = signed_numeric_literal ;
+
+northboundlatitude = signed_numeric_literal ;
+
+southboundlatitude = signed_numeric_literal ;
+
+sql_terminal_character = sql_language_character ;
+
+sql_language_character = latin_letter | digit | sql_special_character ;
+
+latin_letter = /[a-zA-Z]/ ;
+
+digit = /[0-9]/ ;
+
+sql_special_character = space
+    | double_quote
+    | percent
+    | ampersand
+    | quote
+    | left_paren
+    | right_paren
+    | asterisk
+    | plus_sign
+    | comma
+    | minus_sign
+    | period
+    | solidus
+    | colon
+    | semicolon
+    | less_than_operator
+    | equals_operator
+    | greater_than_operator
+    | question_mark
+    | left_bracket
+    | right_bracket
+    | circumflex
+    | underscore
+    | vertical_bar
+    | left_brace
+    | right_brace ;
+
+space = ' ' ;
+
+double_quote = '"' ;
+
+percent = '%' ;
+
+ampersand = '&' ;
+
+quote = "'" ;
+
+left_paren = '(' ;
+
+right_paren = ')' ;
+
+asterisk = '*' ;
+
+plus_sign = '+' ;
+
+comma = ',' ;
+
+minus_sign = '-' ;
+
+period = '.' ;
+
+solidus = '/' ;
+
+colon = ':' ;
+
+semicolon = ';' ;
+
+less_than_operator = '<' ;
+
+equals_operator = '=' ;
+
+greater_than_operator = '>' ;
+
+question_mark = '?' ;
+
+left_bracket = '[' ;
+
+right_bracket = ']' ;
+
+circumflex = '^' ;
+
+underscore = '_' ;
+
+vertical_bar = '|' ;
+
+left_brace = '{' ;
+
+right_brace = '}' ;
+
+token = nondelimiter_token | delimiter_token ;
+
+nondelimiter_token = identifier | key_word | unsigned_numeric_literal ;
+
+key_word = reserved_word ;
+
+reserved_word = 'NOT' | 'AND' | 'OR' | 'LIKE' | 'IS' | 'NULL' | 'EXISTS' | 'DOES-NOT-EXIST'
+    | 'DURING' | 'AFTER' | 'BEFORE' | 'INCLUDE' | 'EXCLUDE' | 'TRUE' | 'FALSE'
+    | 'EQUALS' | 'DISJOINT' | 'INTERSECTS' | 'TOUCHES' | 'CROSSES' | 'WITHIN'
+    | 'CONTAINS' | 'OVERLAPS' | 'RELATE' | 'DWITHIN' | 'BEYOND' | 'POINT'
+    | 'LINESTRING' | 'POLYGON' | 'MULTIPOINT' | 'MULTILINESTRING' | 'MULTIPOLYGON'
+    | 'GEOMETRYCOLLECTION' ;
+
+unsigned_numeric_literal = exact_numeric_literal | approximate_numeric_literal ;
+
+exact_numeric_literal = unsigned_integer [ period [ unsigned_integer ] ]
+    | period unsigned_integer ;
+
+unsigned_integer = { digit }+ ;
+
+approximate_numeric_literal = mantissa 'E' exponent ;
+
+mantissa = exact_numeric_literal ;
+
+exponent = signed_integer ;
+
+signed_integer = [ sign ] unsigned_integer ;
+
+sign = plus_sign | minus_sign ;
+
+delimiter_token = character_string_literal | sql_special_character
+    | not_equals_operator | greater_than_or_equals_operator
+    | less_than_or_equals_operator
+    | left_bracket | right_bracket ;
+
+character_string_literal = quote {character_representation}* quote ;
+
+character_representation = nonquote_character | quote_symbol ;
+
+nonquote_character = /[^']/ ;
+
+quote_symbol = quote quote ;
+
+not_equals_operator = '<>' ;
+
+greater_than_or_equals_operator = '>=' ;
+
+less_than_or_equals_operator = '<=' ;
+
+identifier = identifier_start { identifier_part }* ;
+
+identifier_start = latin_letter ;
+
+identifier_part = latin_letter | digit ;
+
+attribute_name = identifier | compound_attribute_name ;
+
+compound_attribute_name = { identifier period }+ identifier ;

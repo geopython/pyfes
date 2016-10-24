@@ -6,7 +6,7 @@ import logging
 
 from lxml import etree
 
-from ... import types
+from ... import festypes
 from ...namespaces import namespaces
 from .base import BaseSerializer
 from .fesxml import FesXmlSerializer
@@ -45,33 +45,33 @@ class BinaryComparisonOperatorSerializer(BaseSerializer):
 
 
 class PropertyIsEqualToSerializer(BinaryComparisonOperatorSerializer):
-    TYPE_ = types.PropertyIsEqualTo
+    TYPE_ = festypes.PropertyIsEqualTo
 
 
 class PropertyIsNotEqualToSerializer(BinaryComparisonOperatorSerializer):
-    TYPE_ = types.PropertyIsNotEqualTo
+    TYPE_ = festypes.PropertyIsNotEqualTo
 
 
 class PropertyIsLessThanSerializer(BinaryComparisonOperatorSerializer):
-    TYPE_ = types.PropertyIsLessThan
+    TYPE_ = festypes.PropertyIsLessThan
 
 
 class PropertyIsGreaterThanSerializer(BinaryComparisonOperatorSerializer):
-    TYPE_ = types.PropertyIsGreaterThan
+    TYPE_ = festypes.PropertyIsGreaterThan
 
 
 class PropertyIsLessThanOrEqualToSerializer(
         BinaryComparisonOperatorSerializer):
-    TYPE_ = types.PropertyIsLessThanOrEqualTo
+    TYPE_ = festypes.PropertyIsLessThanOrEqualTo
 
 
 class PropertyIsGreaterThanOrEqualToSerializer(
         BinaryComparisonOperatorSerializer):
-    TYPE_ = types.PropertyIsGreaterThanOrEqualTo
+    TYPE_ = festypes.PropertyIsGreaterThanOrEqualTo
 
 
 class PropertyIsLikeSerializer(BaseSerializer):
-    TYPE_ = types.PropertyIsLike
+    TYPE_ = festypes.PropertyIsLike
 
     @classmethod
     def _deserialize(cls, xml_element):
@@ -100,7 +100,7 @@ class PropertyIsLikeSerializer(BaseSerializer):
 
 
 class BoundarySerializer(BaseSerializer):
-    TYPE_ = types.Boundary
+    TYPE_ = festypes.Boundary
     EXTRA_TYPE_NAMES = ["LowerBoundary", "UpperBoundary"]
 
     @classmethod
@@ -121,15 +121,15 @@ class BoundarySerializer(BaseSerializer):
 
 
 class PropertyIsBetweenSerializer(BaseSerializer):
-    TYPE_ = types.PropertyIsBetween
+    TYPE_ = festypes.PropertyIsBetween
 
     @classmethod
     def _deserialize(cls, xml_element):
         return cls.TYPE_(
             expression=FesXmlSerializer.deserialize(xml_element[0]),
-            lower_boundary=types.Boundary(
+            lower_boundary=festypes.Boundary(
                 FesXmlSerializer.deserialize(xml_element[1])),
-            upper_boundary=types.Boundary(
+            upper_boundary=festypes.Boundary(
                 FesXmlSerializer.deserialize(xml_element[2])),
         )
 
@@ -153,7 +153,7 @@ class PropertyIsBetweenSerializer(BaseSerializer):
 
 
 class PropertyIsNullSerializer(BaseSerializer):
-    TYPE_ = types.PropertyIsNull
+    TYPE_ = festypes.PropertyIsNull
 
     @classmethod
     def _deserialize(cls, xml_element):
@@ -177,7 +177,7 @@ class PropertyIsNullSerializer(BaseSerializer):
 
 
 class PropertyIsNilSerializer(BaseSerializer):
-    TYPE_ = types.PropertyIsNil
+    TYPE_ = festypes.PropertyIsNil
 
     @classmethod
     def _deserialize(cls, xml_element):
