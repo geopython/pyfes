@@ -6,7 +6,7 @@ import logging
 
 from lxml import etree
 
-from ... import festypes
+from ... import filterpredicates
 from ...namespaces import namespaces
 from .base import BaseSerializer
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class ValueReferenceSerializer(BaseSerializer):
-    TYPE_ = festypes.ValueReference
+    TYPE_ = filterpredicates.ValueReference
 
     @classmethod
     def _deserialize(cls, xml_element):
@@ -32,7 +32,7 @@ class ValueReferenceSerializer(BaseSerializer):
 
 
 class LiteralSerializer(BaseSerializer):
-    TYPE_ = festypes.Literal
+    TYPE_ = filterpredicates.Literal
 
     @classmethod
     def _deserialize(cls, xml_element):
@@ -50,7 +50,7 @@ class LiteralSerializer(BaseSerializer):
 
 
 class FunctionSerializer(BaseSerializer):
-    TYPE_ = festypes.Function
+    TYPE_ = filterpredicates.Function
 
     @classmethod
     def _deserialize(cls, xml_element):

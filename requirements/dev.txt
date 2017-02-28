@@ -1,4 +1,4 @@
---requirement base.txt
+--requirement production.txt
 
 grako
 ipython

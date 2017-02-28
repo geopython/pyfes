@@ -91,17 +91,23 @@ class CqlParser(Parser):
 
     @graken()
     def _search_condition_(self):
-        self._boolean_term_()
-        with self._optional():
+
+        def sep0():
             self._token('OR')
-            self._search_condition_()
+
+        def block0():
+            self._boolean_term_()
+        self._positive_closure(block0, sep=sep0)
 
     @graken()
     def _boolean_term_(self):
-        self._boolean_factor_()
-        with self._optional():
+
+        def sep0():
             self._token('AND')
-            self._boolean_term_()
+
+        def block0():
+            self._boolean_factor_()
+        self._positive_closure(block0, sep=sep0)
 
     @graken()
     def _boolean_factor_(self):

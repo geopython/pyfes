@@ -6,7 +6,7 @@ import logging
 
 from lxml import etree
 
-from ... import festypes
+from ... import filterpredicates
 from ...namespaces import namespaces
 from .base import BaseSerializer
 from .fesxml import FesXmlSerializer
@@ -41,15 +41,15 @@ class BinaryLogicOperatorSerializer(BaseSerializer):
 
 
 class AndSerializer(BinaryLogicOperatorSerializer):
-    TYPE_ = festypes.And
+    TYPE_ = filterpredicates.And
 
 
 class OrSerializer(BinaryLogicOperatorSerializer):
-    TYPE_ = festypes.Or
+    TYPE_ = filterpredicates.Or
 
 
 class NotSerializer(BaseSerializer):
-    TYPE_ = festypes.Not
+    TYPE_ = filterpredicates.Not
 
     @classmethod
     def _deserialize(cls, xml_element):

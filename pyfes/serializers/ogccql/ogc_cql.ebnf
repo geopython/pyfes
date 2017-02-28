@@ -29,10 +29,12 @@
 sequence_of_search_conditions = search_condition [ ';' search_condition ] ;
 
 #search_condition =  boolean_term [ 'OR' boolean_term ] ;
-search_condition =  boolean_term [ 'OR' search_condition ] ;
+#search_condition =  boolean_term [ 'OR' search_condition ] ;
+search_condition =  'OR'.{ boolean_term }+ ;
 
 #boolean_term = boolean_factor [ 'AND' boolean_factor ] ;
-boolean_term = boolean_factor [ 'AND' boolean_term ] ;
+#boolean_term = boolean_factor [ 'AND' boolean_term ] ;
+boolean_term = 'AND'.{ boolean_factor }+ ;
 
 boolean_factor = [ 'NOT' ] boolean_primary ;
 
@@ -157,7 +159,7 @@ georoutine_argument_list =  left_paren attribute_name comma geometry_literal rig
 
 relgeoop_argument_list = left_paren attribute_name comma geometry_literal comma tolerance right_paren ;
 
-tolerance =unsigned_numeric_literal comma distance_units ;
+tolerance = unsigned_numeric_literal comma distance_units ;
 
 distance_units = "feet" | "meters" | "statute miles" | "nautical miles" | "kilometers" ;
 
