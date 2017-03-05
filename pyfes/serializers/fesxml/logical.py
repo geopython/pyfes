@@ -2,12 +2,13 @@
 
 from __future__ import absolute_import
 from __future__ import unicode_literals
+
 import logging
 
 from lxml import etree
 
-from ... import filterpredicates
-from ...namespaces import namespaces
+from pyfes.fes20 import operators
+from pyfes.fes20.namespaces import namespaces
 from .base import BaseSerializer
 from .fesxml import FesXmlSerializer
 
@@ -41,15 +42,15 @@ class BinaryLogicOperatorSerializer(BaseSerializer):
 
 
 class AndSerializer(BinaryLogicOperatorSerializer):
-    TYPE_ = filterpredicates.And
+    TYPE_ = operators.And
 
 
 class OrSerializer(BinaryLogicOperatorSerializer):
-    TYPE_ = filterpredicates.Or
+    TYPE_ = operators.Or
 
 
 class NotSerializer(BaseSerializer):
-    TYPE_ = filterpredicates.Not
+    TYPE_ = operators.Not
 
     @classmethod
     def _deserialize(cls, xml_element):

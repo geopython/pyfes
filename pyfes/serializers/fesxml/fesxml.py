@@ -3,11 +3,12 @@ XML FES serializer.
 """
 
 from __future__ import absolute_import
+
 import logging
 
 from lxml import etree
 
-from ... import filterpredicates
+from pyfes.fes20 import operators
 from ...utils import lazy_load
 
 logger = logging.getLogger(__name__)
@@ -15,31 +16,31 @@ logger = logging.getLogger(__name__)
 
 class FesXmlSerializer(object):
     serializer_map = {
-        filterpredicates.ValueReference.__name__: ".expression.ValueReferenceSerializer",
-        filterpredicates.Literal.__name__: ".expression.LiteralSerializer",
-        filterpredicates.Function.__name__: ".expression.FunctionSerializer",
-        filterpredicates.PropertyIsEqualTo.__name__:
+        operators.ValueReference.__name__: ".expression.ValueReferenceSerializer",
+        operators.Literal.__name__: ".expression.LiteralSerializer",
+        operators.Function.__name__: ".expression.FunctionSerializer",
+        operators.PropertyIsEqualTo.__name__:
             ".comparison.PropertyIsEqualToSerializer",
-        filterpredicates.PropertyIsNotEqualTo.__name__:
+        operators.PropertyIsNotEqualTo.__name__:
             ".comparison.PropertyIsNotEqualToSerializer",
-        filterpredicates.PropertyIsLessThan.__name__:
+        operators.PropertyIsLessThan.__name__:
             ".comparison.PropertyIsLessThanSerializer",
-        filterpredicates.PropertyIsGreaterThan.__name__:
+        operators.PropertyIsGreaterThan.__name__:
             ".comparison.PropertyIsGreaterThanSerializer",
-        filterpredicates.PropertyIsLessThanOrEqualTo.__name__:
+        operators.PropertyIsLessThanOrEqualTo.__name__:
             ".comparison.PropertyIsLessThanOrEqualToSerializer",
-        filterpredicates.PropertyIsGreaterThanOrEqualTo.__name__:
+        operators.PropertyIsGreaterThanOrEqualTo.__name__:
             ".comparison.PropertyIsGreaterThanOrEqualToSerializer",
-        filterpredicates.PropertyIsLike.__name__: ".comparison.PropertyIsLikeSerializer",
+        operators.PropertyIsLike.__name__: ".comparison.PropertyIsLikeSerializer",
         "LowerBoundary": ".comparison.BoundarySerializer",
         "UpperBoundary": ".comparison.BoundarySerializer",
-        filterpredicates.PropertyIsBetween.__name__:
+        operators.PropertyIsBetween.__name__:
             ".comparison.PropertyIsBetweenSerializer",
-        filterpredicates.PropertyIsNull.__name__: ".comparison.PropertyIsNullSerializer",
-        filterpredicates.PropertyIsNil.__name__: ".comparison.PropertyIsNilSerializer",
-        filterpredicates.And.__name__: ".logical.AndSerializer",
-        filterpredicates.Or.__name__: ".logical.OrSerializer",
-        filterpredicates.Not.__name__: ".logical.NotSerializer",
+        operators.PropertyIsNull.__name__: ".comparison.PropertyIsNullSerializer",
+        operators.PropertyIsNil.__name__: ".comparison.PropertyIsNilSerializer",
+        operators.And.__name__: ".logical.AndSerializer",
+        operators.Or.__name__: ".logical.OrSerializer",
+        operators.Not.__name__: ".logical.NotSerializer",
     }
 
     @classmethod

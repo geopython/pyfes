@@ -2,12 +2,13 @@
 
 from __future__ import absolute_import
 from __future__ import unicode_literals
+
 import logging
 
 from lxml import etree
 
-from ... import filterpredicates
-from ...namespaces import namespaces
+from pyfes.fes20 import operators
+from pyfes.fes20.namespaces import namespaces
 from .base import BaseSerializer
 from .fesxml import FesXmlSerializer
 
@@ -45,33 +46,33 @@ class BinaryComparisonOperatorSerializer(BaseSerializer):
 
 
 class PropertyIsEqualToSerializer(BinaryComparisonOperatorSerializer):
-    TYPE_ = filterpredicates.PropertyIsEqualTo
+    TYPE_ = operators.PropertyIsEqualTo
 
 
 class PropertyIsNotEqualToSerializer(BinaryComparisonOperatorSerializer):
-    TYPE_ = filterpredicates.PropertyIsNotEqualTo
+    TYPE_ = operators.PropertyIsNotEqualTo
 
 
 class PropertyIsLessThanSerializer(BinaryComparisonOperatorSerializer):
-    TYPE_ = filterpredicates.PropertyIsLessThan
+    TYPE_ = operators.PropertyIsLessThan
 
 
 class PropertyIsGreaterThanSerializer(BinaryComparisonOperatorSerializer):
-    TYPE_ = filterpredicates.PropertyIsGreaterThan
+    TYPE_ = operators.PropertyIsGreaterThan
 
 
 class PropertyIsLessThanOrEqualToSerializer(
         BinaryComparisonOperatorSerializer):
-    TYPE_ = filterpredicates.PropertyIsLessThanOrEqualTo
+    TYPE_ = operators.PropertyIsLessThanOrEqualTo
 
 
 class PropertyIsGreaterThanOrEqualToSerializer(
         BinaryComparisonOperatorSerializer):
-    TYPE_ = filterpredicates.PropertyIsGreaterThanOrEqualTo
+    TYPE_ = operators.PropertyIsGreaterThanOrEqualTo
 
 
 class PropertyIsLikeSerializer(BaseSerializer):
-    TYPE_ = filterpredicates.PropertyIsLike
+    TYPE_ = operators.PropertyIsLike
 
     @classmethod
     def _deserialize(cls, xml_element):
@@ -100,7 +101,7 @@ class PropertyIsLikeSerializer(BaseSerializer):
 
 
 class BoundarySerializer(BaseSerializer):
-    TYPE_ = filterpredicates.Boundary
+    TYPE_ = operators.Boundary
     EXTRA_TYPE_NAMES = ["LowerBoundary", "UpperBoundary"]
 
     @classmethod
@@ -121,15 +122,15 @@ class BoundarySerializer(BaseSerializer):
 
 
 class PropertyIsBetweenSerializer(BaseSerializer):
-    TYPE_ = filterpredicates.PropertyIsBetween
+    TYPE_ = operators.PropertyIsBetween
 
     @classmethod
     def _deserialize(cls, xml_element):
         return cls.TYPE_(
             expression=FesXmlSerializer.deserialize(xml_element[0]),
-            lower_boundary=filterpredicates.Boundary(
+            lower_boundary=operators.Boundary(
                 FesXmlSerializer.deserialize(xml_element[1])),
-            upper_boundary=filterpredicates.Boundary(
+            upper_boundary=operators.Boundary(
                 FesXmlSerializer.deserialize(xml_element[2])),
         )
 
@@ -153,7 +154,7 @@ class PropertyIsBetweenSerializer(BaseSerializer):
 
 
 class PropertyIsNullSerializer(BaseSerializer):
-    TYPE_ = filterpredicates.PropertyIsNull
+    TYPE_ = operators.PropertyIsNull
 
     @classmethod
     def _deserialize(cls, xml_element):
@@ -177,7 +178,7 @@ class PropertyIsNullSerializer(BaseSerializer):
 
 
 class PropertyIsNilSerializer(BaseSerializer):
-    TYPE_ = filterpredicates.PropertyIsNil
+    TYPE_ = operators.PropertyIsNil
 
     @classmethod
     def _deserialize(cls, xml_element):

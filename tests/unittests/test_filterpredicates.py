@@ -4,18 +4,18 @@ import logging
 
 import pytest
 
-from pyfes import filterpredicates
+from pyfes.fes20 import operators
 
 pytestmark = pytest.mark.unit
 logger = logging.getLogger(__name__)
 
 
 def test_filter():
-    phony_operator = filterpredicates.PropertyIsGreaterThan(
-        filterpredicates.ValueReference("name"),
-        filterpredicates.Literal("dummy")
+    phony_operator = operators.PropertyIsGreaterThan(
+        operators.ValueReference("name"),
+        operators.Literal("dummy")
     )
-    f1 = filterpredicates.Filter(phony_operator)
+    f1 = operators.Filter(phony_operator)
     assert f1.filter_ == phony_operator
 
 
@@ -30,5 +30,5 @@ class TestValueReference():
         (1, "1"),
     ])
     def test_value(self, value, expected):
-        value_reference = filterpredicates.ValueReference(value)
+        value_reference = operators.ValueReference(value)
         assert value_reference.value == expected

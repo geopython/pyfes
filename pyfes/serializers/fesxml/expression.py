@@ -2,19 +2,20 @@
 
 from __future__ import absolute_import
 from __future__ import unicode_literals
+
 import logging
 
 from lxml import etree
 
-from ... import filterpredicates
-from ...namespaces import namespaces
+from pyfes.fes20 import operators
+from pyfes.fes20.namespaces import namespaces
 from .base import BaseSerializer
 
 logger = logging.getLogger(__name__)
 
 
 class ValueReferenceSerializer(BaseSerializer):
-    TYPE_ = filterpredicates.ValueReference
+    TYPE_ = operators.ValueReference
 
     @classmethod
     def _deserialize(cls, xml_element):
@@ -32,7 +33,7 @@ class ValueReferenceSerializer(BaseSerializer):
 
 
 class LiteralSerializer(BaseSerializer):
-    TYPE_ = filterpredicates.Literal
+    TYPE_ = operators.Literal
 
     @classmethod
     def _deserialize(cls, xml_element):
@@ -50,7 +51,7 @@ class LiteralSerializer(BaseSerializer):
 
 
 class FunctionSerializer(BaseSerializer):
-    TYPE_ = filterpredicates.Function
+    TYPE_ = operators.Function
 
     @classmethod
     def _deserialize(cls, xml_element):

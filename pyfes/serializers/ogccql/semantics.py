@@ -2,9 +2,9 @@
 
 import logging
 
+from pyfes.fes20 import operators
 from .cqlparser import CqlParser
 from .cqlparser import CqlSemantics
-from ... import filterpredicates
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +39,12 @@ class OgcCqlSemantics(CqlSemantics):
         logger.debug("ast: {}".format(ast))
         first_operand, binary_comparison_operator, second_operand = ast
         operator_map = {
-            "=": filterpredicates.PropertyIsEqualTo,
-            ">=": filterpredicates.PropertyIsGreaterThanOrEqualTo,
-            "<=": filterpredicates.PropertyIsLessThanOrEqualTo,
-            ">": filterpredicates.PropertyIsGreaterThan,
-            "<": filterpredicates.PropertyIsLessThan,
-            "<>": filterpredicates.PropertyIsNotEqualTo,
+            "=": operators.PropertyIsEqualTo,
+            ">=": operators.PropertyIsGreaterThanOrEqualTo,
+            "<=": operators.PropertyIsLessThanOrEqualTo,
+            ">": operators.PropertyIsGreaterThan,
+            "<": operators.PropertyIsLessThan,
+            "<>": operators.PropertyIsNotEqualTo,
         }
         return operator_map.get(binary_comparison_operator)(
             first_operand, second_operand)
@@ -53,7 +53,7 @@ class OgcCqlSemantics(CqlSemantics):
         logger.debug("inside search_condition rule")
         logger.debug("ast: {}".format(ast))
         if len(ast) > 1:
-            operator = filterpredicates.Or(ast[0], ast[1], extra_predicates=ast[2:])
+            operator = operators.Or(ast[0], ast[1], extra_predicates=ast[2:])
         else:
             operator = ast[0]
         return operator
@@ -62,7 +62,7 @@ class OgcCqlSemantics(CqlSemantics):
         logger.debug("inside boolean_term rule")
         logger.debug("ast: {}".format(ast))
         if len(ast) > 1:
-            operator = filterpredicates.And(ast[0], ast[1], extra_predicates=ast[2:])
+            operator = operators.And(ast[0], ast[1], extra_predicates=ast[2:])
         else:
             operator = ast[0]
         return operator
@@ -71,7 +71,7 @@ class OgcCqlSemantics(CqlSemantics):
         logger.debug("inside boolean_factor rule")
         logger.debug("ast: {}".format(ast))
         if isinstance(ast, list):
-            operator = filterpredicates.Not(ast[1])
+            operator = operators.Not(ast[1])
         else:
             operator = ast
         return operator

@@ -1,23 +1,43 @@
-"""Custom types for pyfes
+"""FES v2.0 operators
 
-These types are adapted from the FES standard.
+Operators are used in filter parsers.
+
 """
 
 from collections import namedtuple
 
-# expression types
-ValueReference = namedtuple("ValueReference", "value")
-Literal = namedtuple("Literal", "value type_")
-Literal.__new__.__defaults__ = ("string",)
-Function = namedtuple("Function", "name arguments")
-Function.__new__.__defaults__ = ([],)
+from enum import Enum
 
-# comparison operators
-PropertyIsEqualTo = namedtuple(
-    "PropertyIsEqualTo",
-    "first_expression second_expression match_case match_action"
-)
-PropertyIsEqualTo.__new__.__defaults__ = (True, "any")
+
+class MatchAction(Enum):
+    ALL = "All"
+    ANY = "Any"
+    ONE = "One"
+
+
+class BinaryComparisonOperator(object):
+    match_case = True
+    match_action = MatchAction.ANY
+
+    def __init__(self, match_case=True, match_action=MatchAction.ANY):
+        self.match_case = match_case
+        self.match_action = match_action
+
+
+class PropertyIsEqualTo(BinaryComparisonOperator):
+    first_expression = None
+    second_expression = None
+
+    def __init__(self, first_expression, second_expression,
+                 match_case=True, match_action=MatchAction.ANY):
+        super(PropertyIsEqualTo, self).__init__(
+            match_case=match_case, match_action=match_action)
+        self.first_expression = first_expression
+        self.second_expression = second_expression
+
+
+
+
 PropertyIsNotEqualTo = namedtuple(
     "PropertyIsNotEqualTo",
     "first_expression second_expression match_case match_action"
