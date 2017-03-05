@@ -122,5 +122,3 @@ class Function(Expression):
 
     def remove_argument(self, argument):
         self._arguments._data.remove(argument)
-
-

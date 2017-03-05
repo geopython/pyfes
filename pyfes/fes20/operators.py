@@ -8,6 +8,9 @@ from collections import namedtuple
 
 from enum import Enum
 
+from .. import errors
+from . import expressions
+
 
 class MatchAction(Enum):
     ALL = "All"
@@ -15,58 +18,114 @@ class MatchAction(Enum):
     ONE = "One"
 
 
-class BinaryComparisonOperator(object):
-    match_case = True
-    match_action = MatchAction.ANY
+class BinaryComparisonName(Enum):
+    PROPERTY_IS_EQUAL_TO = "PropertyIsEqualTo"
+    PROPERTY_IS_NOT_EQUAL_TO = "PropertyIsNotEqualTo"
+    PROPERTY_IS_LESS_THAN = "PropertyIsLessThan"
+    PROPERTY_IS_LESS_THAN_OR_EQUAL_TO = "PropertyIsLessThanOrEqualTo"
+    PROPERTY_IS_GREATER_THAN = "PropertyIsGreaterThan"
+    PROPERTY_IS_GREATER_THAN_OR_EQUAL_TO = "PropertyIsGreaterThanOrEqualTo"
 
-    def __init__(self, match_case=True, match_action=MatchAction.ANY):
-        self.match_case = match_case
-        self.match_action = match_action
+
+def validate_operand(operand, allowed_types=(expressions.Expression,)):
+    if not isinstance(operand, allowed_types):
+        raise errors.InvalidExpressionError
 
 
-class PropertyIsEqualTo(BinaryComparisonOperator):
-    first_expression = None
-    second_expression = None
+class SingleExpressionOperator(object):
+    _expression = None
 
-    def __init__(self, first_expression, second_expression,
-                 match_case=True, match_action=MatchAction.ANY):
-        super(PropertyIsEqualTo, self).__init__(
-            match_case=match_case, match_action=match_action)
+    @property
+    def expression(self):
+        return self._expression
+
+    @expression.setter
+    def expression(self, expression):
+        validate_operand(expression)
+        self._expression = expression
+
+
+class DoubleExpressionOperator(object):
+    _first_expression = None
+    _second_expression = None
+
+    @property
+    def first_expression(self):
+        return self._first_expression
+
+    @first_expression.setter
+    def first_expression(self, expression):
+        validate_operand(expression)
+        self._first_expression = expression
+
+    @property
+    def second_expression(self):
+        return self._second_expression
+
+    @second_expression.setter
+    def second_expression(self, expression):
+        validate_operand(expression)
+        self._second_expression = expression
+
+    def __init__(self, first_expression, second_expression):
         self.first_expression = first_expression
         self.second_expression = second_expression
 
 
+class BinaryComparisonOperator(DoubleExpressionOperator):
+    match_case = True
+    _operator_type = None
+    _match_action = MatchAction.ANY
+
+    @property
+    def operator_type(self):
+        return self._operator_type
+
+    @operator_type.setter
+    def operator_type(self, type_):
+        try:
+            self._operator_type = BinaryComparisonName(type_)
+        except ValueError:
+            raise errors.InvalidOperatorError
+
+    @property
+    def match_action(self):
+        return self._match_action
+
+    @match_action.setter
+    def match_action(self, action):
+        try:
+            self._match_action = MatchAction(action)
+        except ValueError:
+            raise ValueError("Invalid match_action")
+
+    def __init__(self, operator_type, first_expression, second_expression,
+                 match_case=True, match_action=MatchAction.ANY):
+        super(BinaryComparisonOperator, self).__init__(
+            first_expression=first_expression,
+            second_expression=second_expression
+        )
+        self.operator_type = operator_type
+        self.match_case = match_case
+        self.match_action = match_action
 
 
-PropertyIsNotEqualTo = namedtuple(
-    "PropertyIsNotEqualTo",
-    "first_expression second_expression match_case match_action"
-)
-PropertyIsNotEqualTo.__new__.__defaults__ = (True, "any")
-PropertyIsLessThan = namedtuple(
-    "PropertyIsLessThan",
-    "first_expression second_expression match_case match_action"
-)
-PropertyIsLessThan.__new__.__defaults__ = (True, "any")
-PropertyIsGreaterThan = namedtuple(
-    "PropertyIsGreaterThan",
-    "first_expression second_expression match_case match_action"
-)
-PropertyIsGreaterThan.__new__.__defaults__ = (True, "any")
-PropertyIsLessThanOrEqualTo = namedtuple(
-    "PropertyIsLessThanOrEqualTo",
-    "first_expression second_expression match_case match_action"
-)
-PropertyIsLessThanOrEqualTo.__new__.__defaults__ = (True, "any")
-PropertyIsGreaterThanOrEqualTo = namedtuple(
-    "PropertyIsgreaterThanOrEqualTo",
-    "first_expression second_expression match_case match_action"
-)
-PropertyIsGreaterThanOrEqualTo.__new__.__defaults__ = (True, "any")
-PropertyIsLike = namedtuple(
-    "PropertyIsLike",
-    "first_expression second_expression wild_card single_char escape_char"
-)
+class LikeOperator(DoubleExpressionOperator):
+    wild_card = ""
+    single_char = ""
+    escape_char = ""
+
+    def __init__(self, first_expression, second_expression,
+                 wild_card="", single_char="", escape_char=""):
+        super(LikeOperator, self).__init__(
+            first_expression=first_expression,
+            second_expression=second_expression
+        )
+        self.wild_card = str(wild_card)
+        self.single_char = str(single_char)
+        self.escape_char = str(escape_char)
+
+
 Boundary = namedtuple("Boundary", "expression")
 PropertyIsBetween = namedtuple("PropertyIsBetween",
                                "expression lower_boundary upper_boundary")

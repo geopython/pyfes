@@ -14,26 +14,15 @@ code.
     pip install git+[repo_url]#egg=pyfes
 
 
-### Installation with docker
-
-If you want to run pyfes inside a docker container, since we are not
-on dockerhub (yet), just clone this repository and then build the
-image with:
-
-    docker build -t pyfes -f Dockerfiles/base.Dockerfile .
-    docker run -ti --rm pyfes
-
-If you want to set up a development environment for pyfes, use the
-`Dockerfiles/dev.Dockerfile` in addition:
-
-    docker build -t pyfes_dev -f Dockerfiles/dev.Dockerfile .
-    docker run -ti --rm pyfes_dev /bin/bash
-
-
 ## Testing
 
+pyfes uses [py.test](http://docs.pytest.org/en/latest/) for testing.
+Run tests with:
 
-## OGC CQL parser
+    py.test -m unit --cov pyfes
+
+
+## OGC CQL parser (work-in-progress)
 
 The CQL parser is generated with grako, taking as input the CQL definition
 in ebnf.
