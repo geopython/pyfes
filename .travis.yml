@@ -1,0 +1,20 @@
+language: python
+
+cache: pip
+
+dist: trusty
+
+python:
+  - "3.5"
+
+addons:
+  apt:
+    packages:
+      - libxml2-dev
+      - libxslt1-dev
+
+install:
+  - pip --requirement requirements/dev.txt
+
+script:
+  - py.test -m unit --cov pyfes --exitfirst
