@@ -1,5 +1,8 @@
 # pyfes
 
+[![Build
+Status](https://travis-ci.org/geopython/pyfes.svg?branch=master)](https://travis-ci.org/geopython/pyfes)
+
 An implementation of [OGC
 FES/ISO1943](http://www.opengeospatial.org/standards/filter)
 
