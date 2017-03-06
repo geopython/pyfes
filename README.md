@@ -22,7 +22,7 @@ Run tests with:
     py.test -m unit --cov pyfes
 
 
-## OGC CQL parser (work-in-progress)
+## OGC CQL parser - work-in-progress
 
 The CQL parser is generated with grako, taking as input the CQL definition
 in ebnf.
