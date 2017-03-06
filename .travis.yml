@@ -15,6 +15,7 @@ addons:
 
 install:
   - pip install --requirement requirements/dev.txt
+  - pip install pyfes
 
 script:
   - py.test -m unit --cov pyfes --exitfirst
