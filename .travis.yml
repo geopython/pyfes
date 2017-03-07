@@ -19,3 +19,4 @@ install:
 
 script:
   - py.test -m unit --cov pyfes --exitfirst
+  - codecov

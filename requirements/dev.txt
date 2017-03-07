@@ -1,5 +1,6 @@
 --requirement production.txt
 
+codecov
 grako
 ipython
 pytest
