@@ -26,6 +26,6 @@ install:
 script:
   - tox
 
-after-success:
+after_success:
   - tox -e coverage-report
   - codecov
