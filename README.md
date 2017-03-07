@@ -2,11 +2,10 @@
 
 [![Build
 Status](https://travis-ci.org/geopython/pyfes.svg?branch=master)](https://travis-ci.org/geopython/pyfes)
-
 [![codecov](https://codecov.io/gh/geopython/pyfes/branch/master/graph/badge.svg)](https://codecov.io/gh/geopython/pyfes)
-An implementation of [OGC
 
-FES/ISO1943](http://www.opengeospatial.org/standards/filter)
+
+An implementation of [OGC FES/ISO1943](http://www.opengeospatial.org/standards/filter)
 
 
 ## Installation
