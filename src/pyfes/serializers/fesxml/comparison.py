@@ -6,9 +6,9 @@ from __future__ import unicode_literals
 import logging
 
 from lxml import etree
-
 from pyfes.fes20 import operators
-from pyfes.fes20.namespaces import namespaces
+
+from src.pyfes.fes20.namespaces import namespaces
 from .base import BaseSerializer
 from .fesxml import FesXmlSerializer
 

@@ -5,11 +5,10 @@ Operators are used in filter parsers.
 """
 
 from collections import namedtuple
-
 from enum import Enum
 
-from .. import errors
 from . import expressions
+from .. import errors
 
 
 class MatchAction(Enum):

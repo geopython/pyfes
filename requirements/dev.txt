@@ -1,8 +1,7 @@
 --requirement production.txt
 
-codecov
+coverage
 grako
 ipython
 pytest
-pytest-cov
 pytest-flake8

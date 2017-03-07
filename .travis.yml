@@ -4,8 +4,12 @@ cache: pip
 
 dist: trusty
 
-python:
-  - "3.5"
+matrix:
+  include:
+    - python: "2.7"
+      env: TOXENV=py27
+    - python: "3.5"
+      env: TOXENV=py35
 
 addons:
   apt:
@@ -13,10 +17,15 @@ addons:
       - libxml2-dev
       - libxslt1-dev
 
+before_install:
+  - pip install codecov
+
 install:
-  - pip install --requirement requirements/dev.txt
-  - pip install .
+  - pip install tox
 
 script:
-  - py.test -m unit --cov pyfes --exitfirst
+  - tox
+
+after-success:
+  - tox -e coverage-report
   - codecov

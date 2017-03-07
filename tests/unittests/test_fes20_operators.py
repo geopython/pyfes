@@ -1,10 +1,10 @@
 """Tests for the custom pyfes types"""
 
 import pytest
+from pyfes.fes20 import expressions
+from pyfes.fes20 import operators
 
 from pyfes import errors
-from pyfes.fes20 import operators
-from pyfes.fes20 import expressions
 
 pytestmark = pytest.mark.unit
 
@@ -20,16 +20,16 @@ def test_validate_operand(operand):
 
 @pytest.mark.parametrize("operand, allowed", [
     (
-        expressions.ValueReference("first"),
-        (expressions.Literal, expressions.Function)
+            expressions.ValueReference("first"),
+            (expressions.Literal, expressions.Function)
     ),
     (
-        expressions.Literal("second"),
-        (expressions.ValueReference, expressions.Function)
+            expressions.Literal("second"),
+            (expressions.ValueReference, expressions.Function)
     ),
     (
-        expressions.Function("third"),
-        (expressions.ValueReference, expressions.Literal)
+            expressions.Function("third"),
+            (expressions.ValueReference, expressions.Literal)
     ),
 ])
 def test_validate_operand_invalid(operand, allowed):

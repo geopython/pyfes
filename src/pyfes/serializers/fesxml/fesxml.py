@@ -8,7 +8,7 @@ import logging
 
 from lxml import etree
 
-from pyfes.fes20 import operators
+from src.pyfes.fes20 import operators
 from ...utils import lazy_load
 
 logger = logging.getLogger(__name__)

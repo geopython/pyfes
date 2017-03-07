@@ -2,7 +2,7 @@
 
 import logging
 
-from pyfes.fes20 import operators
+from src.pyfes.fes20 import operators
 from .cqlparser import CqlParser
 from .cqlparser import CqlSemantics
 

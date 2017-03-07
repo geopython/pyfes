@@ -1,0 +1,11 @@
+[run]
+branch = True
+source = pyfes
+
+[paths]
+source =
+    src/pyfes
+    .tox/*/lib/python*/site-packages/pyfes
+
+[report]
+show_missing = True
