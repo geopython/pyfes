@@ -1,4 +1,4 @@
-"""Expression types for FES version 2."""
+"""Expression types for FES version 2.0"""
 
 from itertools import product
 
@@ -83,7 +83,7 @@ class Function(Expression):
     Examples
     --------
 
-    >>> f1 = Function("make_cofee", arguments=["with_sugar"])
+    >>> f1 = Function("make_cofee", arguments=[Literal("with_sugar")])
 
     """
 
@@ -116,8 +116,8 @@ class Function(Expression):
         self.arguments = list(arguments) if arguments is not None else []
 
     def add_argument(self, argument):
-        for validator in self.validators:
-            validator(argument)
+        if not isinstance(argument, Expression):
+            raise errors.InvalidBoundaryTypeError
         self._arguments._data.append(argument)
 
     def remove_argument(self, argument):
