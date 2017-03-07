@@ -5,7 +5,11 @@ Operators are used in filter parsers.
 """
 
 from collections import namedtuple
+
 from enum import Enum
+from shapely import geometry
+from shapely.geos import ReadingError
+from shapely import wkt
 
 from . import expressions
 from .. import errors
@@ -26,6 +30,39 @@ class BinaryComparisonName(Enum):
     PROPERTY_IS_GREATER_THAN_OR_EQUAL_TO = "PropertyIsGreaterThanOrEqualTo"
 
 
+class DistanceOperatorName(Enum):
+    BEYOND = "Beyond"
+    DWITHIN = "DWithin"
+
+
+class SpatialOperatorName(Enum):
+    BBOX = "BBOX"
+    EQUALS = "Equals"
+    DISJOINT = "Disjoint"
+    INTERSECTS = "Intersects"
+    TOUCHES = "Touches"
+    CROSSES = "Crosses"
+    WITHIN = "Within"
+    CONTAINS = "Contains"
+    OVERLAPS = "Overlaps"
+
+
+def as_geometry(geom):
+    is_shapely_geom = isinstance(
+        geom,
+        (
+            # TODO - add the remaining shapely geometry types
+            geometry.Point,
+            geometry.LineString,
+        )
+    )
+    if is_shapely_geom:
+        result = geom
+    else:
+        result = wkt.loads(geom)
+    return result
+
+
 def validate_operand(operand, allowed_types=(expressions.Expression,)):
     if not isinstance(operand, allowed_types):
         raise errors.InvalidExpressionError
@@ -42,6 +79,9 @@ class SingleExpressionOperator(object):
     def expression(self, expression):
         validate_operand(expression)
         self._expression = expression
+
+    def __init__(self, expression):
+        self.expression = expression
 
 
 class DoubleExpressionOperator(object):
@@ -125,66 +165,136 @@ class LikeOperator(DoubleExpressionOperator):
         self.escape_char = str(escape_char)
 
 
-Boundary = namedtuple("Boundary", "expression")
-PropertyIsBetween = namedtuple("PropertyIsBetween",
-                               "expression lower_boundary upper_boundary")
-PropertyIsNull = namedtuple("PropertyIsNull", "expression")
-PropertyIsNil = namedtuple("PropertyIsNil", "expression nil_reason")
-PropertyIsNil.__new__.__defaults__ = ("equals",)
+class BetweenComparisonOperator(SingleExpressionOperator):
+    """
+    According to the FES standard, the PropertyIsBetween operator is defined as
+    a compact way of encoding a range check. The lower and upper boundary
+    values are inclusive.
 
-# spatial operators
-Beyond = namedtuple("Beyond", "distance first_argument second_argument")
-Beyond.__new__.__defaults__ = (None,)
-DWithin = namedtuple("DWithin", "distance first_argument second_argument")
-DWithin.__new__.__defaults__ = (None,)
-BBOX = namedtuple("BBOX", "first_argument second_argument")
-BBOX.__new__.__defaults__ = (None,)
-Equals = namedtuple("Equals", "first_argument second_argument")
-Equals.__new__.__defaults__ = (None,)
-Disjoint = namedtuple("Disjoint", "first_argument second_argument")
-Disjoint.__new__.__defaults__ = (None,)
-Intersects = namedtuple("Intersects", "first_argument second_argument")
-Intersects.__new__.__defaults__ = (None,)
-Touches = namedtuple("Touches", "first_argument second_argument")
-Touches.__new__.__defaults__ = (None,)
-Crosses = namedtuple("Crosses", "first_argument second_argument")
-Crosses.__new__.__defaults__ = (None,)
-Within = namedtuple("Within", "first_argument second_argument")
-Within.__new__.__defaults__ = (None,)
-Contains = namedtuple("Contains", "first_argument second_argument")
-Contains.__new__.__defaults__ = (None,)
-Overlaps = namedtuple("Overlaps", "first_argument second_argument")
-Overlaps.__new__.__defaults__ = (None,)
-# todo: add the SpatialDescription Union values
+    """
 
-# temporal operators
-TemporalOperand = namedtuple("TemporalOperand",
-                             "temporal_object value_reference")
-After = namedtuple("After", "value_reference temporal_operand")
-Before = namedtuple("Before", "value_reference temporal_operand")
-Begins = namedtuple("Begins", "value_reference temporal_operand")
-BegunBy = namedtuple("BegunBy", "value_reference temporal_operand")
-TContains = namedtuple("TContains", "value_reference temporal_operand")
-During = namedtuple("During", "value_reference temporal_operand")
-TEquals = namedtuple("TEquals", "value_reference temporal_operand")
-TOverlaps = namedtuple("TOverlaps", "value_reference temporal_operand")
-Meets = namedtuple("Meets", "value_reference temporal_operand")
-OverlappedBy = namedtuple("OverlappedBy", "value_reference temporal_operand")
-MetBy = namedtuple("MetBy", "value_reference temporal_operand")
-EndedBy = namedtuple("EndedBy", "value_reference temporal_operand")
-AnyInteracts = namedtuple("AnyInteracts", "value_reference temporal_operand")
+    _lower_boundary = None
+    _upper_boundary = None
 
-# logical operators
-And = namedtuple("And", "first_predicate second_predicate extra_predicates")
-And.__new__.__defaults__ = (None,)
-Or = namedtuple("Or", "first_predicate second_predicate extra_predicates")
-Or.__new__.__defaults__ = (None,)
-Not = namedtuple("Not", "filter_predicate")
+    @property
+    def lower_boundary(self):
+        return self._lower_boundary
 
-# identifier operators
-Version = namedtuple("Version", "version_action_token index timestamp")
-ResourceId = namedtuple("ResourceId", "rid version start_time end_time")
-ResourceId.__new__.__defaults__ = (None, None, None)
+    @lower_boundary.setter
+    def lower_boundary(self, expression):
+        validate_operand(expression)
+        self._lower_boundary = expression
 
-# filter
-Filter = namedtuple("Filter", "filter_")
+    @property
+    def upper_boundary(self):
+        return self._upper_boundary
+
+    @upper_boundary.setter
+    def lower_boundary(self, expression):
+        validate_operand(expression)
+        self._upper_boundary = expression
+
+    def __init__(self, expression, lower_boundary, upper_boundary):
+        super(BetweenComparisonOperator, self).__init__(expression=expression)
+        self.lower_boundary = lower_boundary
+        self.upper_boundary = upper_boundary
+
+
+class NullOperator(SingleExpressionOperator):
+    """
+    The PropertyIsNull operator tests the specified property to see if it
+    exists in the resource being evaluated. This corresponds to checking
+    whether the property exists in the real-world.
+    """
+
+    def __init__(self, expression):
+        super(NullOperator, self).__init__(expression=expression)
+
+
+class NilOperator(SingleExpressionOperator):
+    """
+    The PropertyIsNil operator tests the content of the specified property and
+    evaluates if it is nil. The operator can also evaluate the nil reason using
+    the nilReason parameter. The implied operator for evaluating the nil reason
+    is "equals".
+    """
+
+    nil_reason = ""
+
+    def __init__(self, expression, nil_reason=""):
+        super(NilOperator, self).__init__(expression=expression)
+        self.nil_reason = nil_reason
+
+
+class DistanceOperator(SingleExpressionOperator):
+    distance = 0.0
+    _operator_type = None
+    _geometry = None
+
+    @property
+    def operator_type(self):
+        return self._operator_type
+
+    @operator_type.setter
+    def operator_type(self, type_):
+        try:
+            self._operator_type = DistanceOperatorName(type_)
+        except ValueError:
+            raise errors.InvalidOperatorError
+
+    @property
+    def geometry(self):
+        return self._geometry
+
+    @geometry.setter
+    def geometry(self, geometry):
+        try:
+            self._geometry = as_geometry(geometry)
+        except ReadingError:
+            raise errors.InvalidOperatorError
+
+    def __init__(self, expression, operator_type, geometry, distance):
+        super(DistanceOperator, self).__init__(expression=expression)
+        self.operator_type = operator_type
+        self.geometry = geometry
+        self.distance = float(distance)
+
+
+class BinarySpatialOperator(SingleExpressionOperator):
+    _second_operand = None
+    _operator_type = None
+
+    @property
+    def operator_type(self):
+        return self._operator_type
+
+    @operator_type.setter
+    def operator_type(self, type_):
+        try:
+            self._operator_type = SpatialOperatorName(type_)
+        except ValueError:
+            raise errors.InvalidOperatorError
+
+    @property
+    def second_operand(self):
+        return self._second_operand
+
+    @second_operand.setter
+    def second_operand(self, operand):
+        if isinstance(operand, expressions.Expression):
+            result = operand
+        else:  #FIXME - This method is probably not done yet
+            try:
+                result = as_geometry(operand)
+            except ReadingError:
+                raise errors.InvalidOperatorError
+        self._second_operand = result
+
+    def __init__(self, first_operand, second_operand, operator_type):
+        super(DistanceOperator, self).__init__(expression=first_operand)
+        self.operator_type = operator_type
+        self.second_operand = second_operand
+
+# TODO: Add temporal operators
+# TODO: Add logical operators
+# TODO: Add identifier operators
