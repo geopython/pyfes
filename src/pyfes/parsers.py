@@ -23,7 +23,7 @@ def parse_filter(data, **kwargs):
     ...       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     ...       xsi:schemaLocation="http://www.opengis.net/fes/2.0
     ...         http://schemas.opengis.net/filter/2.0/filterAll.xsd"
-    ...     >
+    ... >
     ...         <fes:PropertyIsLessThan>
     ...             <fes:ValueReference>DEPTH</fes:ValueReference>
     ...             <fes:Literal>30</fes:Literal>
