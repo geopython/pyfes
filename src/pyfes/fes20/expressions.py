@@ -2,6 +2,7 @@
 
 from itertools import product
 
+from .. import errors
 from ..utils import ReadOnlyList
 
 
@@ -46,6 +47,12 @@ class Literal(Expression):
         super(Literal, self).__init__(validators=validators)
         self.value = value
 
+    def __eq__(self, other):
+        if isinstance(other, Literal):
+            return self.value == other.value
+        else:
+            return NotImplemented
+
     def __str__(self):
         return "{0.__class__.__name__} <{0.value}, {0.type_}>".format(self)
 
@@ -71,6 +78,12 @@ class ValueReference(Expression):
     def __init__(self, value, validators=None):
         super(ValueReference, self).__init__(validators=validators)
         self.value = value
+
+    def __eq__(self, other):
+        if isinstance(other, ValueReference):
+            return self.value == other.value
+        else:
+            return NotImplemented
 
 
 class Function(Expression):
@@ -114,6 +127,13 @@ class Function(Expression):
         super(Function, self).__init__(validators=validators)
         self.name = name
         self.arguments = list(arguments) if arguments is not None else []
+
+    def __eq__(self, other):
+        if isinstance(other, Function):
+            return (self.name == other.name and
+                    len(self.arguments) == len(other.arguments) and
+                    all(a == b for a, b in zip(self.arguments,
+                                               other.arguments)))
 
     def add_argument(self, argument):
         if not isinstance(argument, Expression):

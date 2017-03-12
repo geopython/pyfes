@@ -4,7 +4,11 @@ from __future__ import absolute_import
 import importlib
 import logging
 
+from lxml import etree
+
 logger = logging.getLogger(__name__)
+
+XML_PARSER = etree.XMLParser(resolve_entities=False)
 
 
 def lazy_load(path, package="pyfes"):

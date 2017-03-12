@@ -56,6 +56,28 @@ def test_validate_operand_invalid(operand, allowed):
         operators.validate_operand(operand=operand, allowed_types=allowed)
 
 
+@pytest.mark.parametrize("first, second", [
+    (
+        operators.BinaryComparisonOperator(
+            operator_type=operators.BinaryComparisonName.PROPERTY_IS_EQUAL_TO,
+            first_expression=expressions.ValueReference("this"),
+            second_expression=expressions.Literal("that"),
+            match_action=operators.MatchAction.ANY,
+            match_case=True
+        ),
+        operators.BinaryComparisonOperator(
+            operator_type=operators.BinaryComparisonName.PROPERTY_IS_EQUAL_TO,
+            first_expression=expressions.ValueReference("this"),
+            second_expression=expressions.Literal("that"),
+            match_action=operators.MatchAction.ANY,
+            match_case=True
+        )
+    ),
+])
+def test_operator_equality(first, second):
+    assert first == second
+
+
 @pytest.mark.parametrize("operator_type", [
     "PropertyIsEqualTo",
     "PropertyIsNotEqualTo",

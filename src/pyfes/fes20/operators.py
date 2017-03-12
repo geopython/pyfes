@@ -68,7 +68,13 @@ def validate_operand(operand, allowed_types=(expressions.Expression,)):
         raise errors.InvalidExpressionError
 
 
-class SingleExpressionOperator(object):
+class OperatorBase(object):
+
+    # TODO - It would be nice to implement equality comparisons
+    pass
+
+
+class SingleExpressionOperator(OperatorBase):
     _expression = None
 
     @property
@@ -83,8 +89,14 @@ class SingleExpressionOperator(object):
     def __init__(self, expression):
         self.expression = expression
 
+    def __eq__(self, other):
+        if isinstance(other, SingleExpressionOperator):
+            return self.expression == other.expression
+        else:
+            return NotImplemented
 
-class DoubleExpressionOperator(object):
+
+class DoubleExpressionOperator(OperatorBase):
     _first_expression = None
     _second_expression = None
 
@@ -109,6 +121,13 @@ class DoubleExpressionOperator(object):
     def __init__(self, first_expression, second_expression):
         self.first_expression = first_expression
         self.second_expression = second_expression
+
+    def __eq__(self, other):
+        if isinstance(other, DoubleExpressionOperator):
+            return (self.first_expression == other.first_expression and
+                    self.second_expression == other.second_expression)
+        else:
+            return NotImplemented
 
 
 class BinaryComparisonOperator(DoubleExpressionOperator):
@@ -147,6 +166,14 @@ class BinaryComparisonOperator(DoubleExpressionOperator):
         self.operator_type = operator_type
         self.match_case = match_case
         self.match_action = match_action
+
+    def __eq__(self, other):
+        if isinstance(other, BinaryComparisonOperator):
+            return (super(BinaryComparisonOperator, self).__eq__(other) and
+                    self.match_action == other.match_action and
+                    self.match_case == other.match_case)
+        else:
+            return NotImplemented
 
 
 class LikeOperator(DoubleExpressionOperator):
@@ -291,7 +318,7 @@ class BinarySpatialOperator(SingleExpressionOperator):
         self._second_operand = result
 
     def __init__(self, first_operand, second_operand, operator_type):
-        super(DistanceOperator, self).__init__(expression=first_operand)
+        super(BinarySpatialOperator, self).__init__(expression=first_operand)
         self.operator_type = operator_type
         self.second_operand = second_operand
 
