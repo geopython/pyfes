@@ -1,9 +1,6 @@
 """Tests for the custom pyfes types"""
 
 import pytest
-from shapely import geometry
-from shapely.geos import ReadingError
-from shapely import wkt
 
 from pyfes.fes20 import expressions
 from pyfes.fes20 import operators
@@ -11,21 +8,6 @@ from pyfes.fes20 import operators
 from pyfes import errors
 
 pytestmark = pytest.mark.unit
-
-# TODO - add tests for the remaining shapely geometry types
-@pytest.mark.parametrize("geometry, expected", [
-    (geometry.Point(1.0, 1.0), geometry.Point(1.0, 1.0)),
-    ("POINT(1.0 1.0)", geometry.Point(1.0, 1.0)),
-])
-def test_as_geometry(geometry, expected):
-    result = operators.as_geometry(geometry)
-    assert result == expected
-
-
-def test_as_geometry_invalid():
-    invalid_geometry = "fake"
-    with pytest.raises(ReadingError):
-        operators.as_geometry(invalid_geometry)
 
 
 @pytest.mark.parametrize("operand", [

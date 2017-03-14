@@ -7,12 +7,10 @@ Operators are used in filter parsers.
 from collections import namedtuple
 
 from enum import Enum
-from shapely import geometry
-from shapely.geos import ReadingError
-from shapely import wkt
 
 from . import expressions
 from .. import errors
+from .. import validators
 
 
 class MatchAction(Enum):
@@ -45,22 +43,6 @@ class SpatialOperatorName(Enum):
     WITHIN = "Within"
     CONTAINS = "Contains"
     OVERLAPS = "Overlaps"
-
-
-def as_geometry(geom):
-    is_shapely_geom = isinstance(
-        geom,
-        (
-            # TODO - add the remaining shapely geometry types
-            geometry.Point,
-            geometry.LineString,
-        )
-    )
-    if is_shapely_geom:
-        result = geom
-    else:
-        result = wkt.loads(geom)
-    return result
 
 
 def validate_operand(operand, allowed_types=(expressions.Expression,)):
@@ -255,8 +237,8 @@ class NilOperator(SingleExpressionOperator):
 
 class DistanceOperator(SingleExpressionOperator):
     distance = 0.0
-    _operator_type = None
     _geometry = None
+    _operator_type = None
 
     @property
     def operator_type(self):
@@ -274,11 +256,9 @@ class DistanceOperator(SingleExpressionOperator):
         return self._geometry
 
     @geometry.setter
-    def geometry(self, geometry):
-        try:
-            self._geometry = as_geometry(geometry)
-        except ReadingError:
-            raise errors.InvalidOperatorError
+    def geometry(self, new_geometry):
+        validators.validate_wkt(new_geometry)
+        self._geometry = new_geometry
 
     def __init__(self, expression, operator_type, geometry, distance):
         super(DistanceOperator, self).__init__(expression=expression)
@@ -310,10 +290,11 @@ class BinarySpatialOperator(SingleExpressionOperator):
     def second_operand(self, operand):
         if isinstance(operand, expressions.Expression):
             result = operand
-        else:  #FIXME - This method is probably not done yet
+        else:
             try:
-                result = as_geometry(operand)
-            except ReadingError:
+                validators.validate_wkt(operand)
+                result = operand
+            except errors.ValidationError:
                 raise errors.InvalidOperatorError
         self._second_operand = result
 
