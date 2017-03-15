@@ -120,8 +120,13 @@ class Function(Expression):
     @arguments.setter
     def arguments(self, new_arguments):
         self._arguments = ReadOnlyList()
-        for argument, validator in product(new_arguments, self.validators):
-            self.add_argument(argument)
+        if len(self.validators) > 0:
+            for argument, validator in product(new_arguments, self.validators):
+                validator(argument)
+                self.add_argument(argument)
+        else:
+            for argument in new_arguments:
+                self.add_argument(argument)
 
     def __init__(self, name, arguments=None, validators=None):
         super(Function, self).__init__(validators=validators)
@@ -134,10 +139,12 @@ class Function(Expression):
                     len(self.arguments) == len(other.arguments) and
                     all(a == b for a, b in zip(self.arguments,
                                                other.arguments)))
+        else:
+            return NotImplemented
 
     def add_argument(self, argument):
         if not isinstance(argument, Expression):
-            raise errors.InvalidBoundaryTypeError
+            raise errors.InvalidExpressionError
         self._arguments._data.append(argument)
 
     def remove_argument(self, argument):

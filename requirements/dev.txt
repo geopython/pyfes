@@ -3,5 +3,6 @@
 coverage
 grako
 ipython
+mock
 pytest
 pytest-flake8
