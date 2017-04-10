@@ -7,6 +7,17 @@ def validate_gml_property_name(item):
     """Check that the input conforms to GML naming rules for properties"""
     raise ValidationError
 
+
+def validate_gml_temporal_object(item):
+    """Check that the input is a GML temporal object."""
+    raise ValidationError
+
+
+def validate_resource_identifier(rid):
+    """Check that the input is a valid resource identifier."""
+    raise ValidationError
+
+
 def validate_wkt(item):
     """Check that the input is a valid WKT string."""
     # TODO - perform a stricter validation by checking coordinates
