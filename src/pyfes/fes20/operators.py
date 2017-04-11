@@ -369,7 +369,7 @@ class TemporalOperator(SingleExpressionOperator):
 
 class BinaryLogicOperator(DoubleExpressionOperator):
     _operator_type = None
-    _allowed_operand_types = (expression.Expression, NonIdOperator,)
+    _allowed_operand_types = (expressions.Expression, NonIdOperator,)
 
     def __init__(self, first_expression, second_expression, operator_type):
         super(BinaryLogicOperator, self).__init__(
@@ -392,7 +392,7 @@ class BinaryLogicOperator(DoubleExpressionOperator):
 
 class UnaryLogicOperator(SingleExpressionOperator):
     _operator_type = None
-    _allowed_operand_types = (expression.Expression, NonIdOperator,)
+    _allowed_operand_types = (expressions.Expression, NonIdOperator,)
 
     def __init__(self, operand, operator_type):
         super(UnaryLogicOperator, self).__init__(expression=operand)
@@ -427,6 +427,10 @@ class ResourceId(IdentifierOperator):
         # TODO- add support for end_time
 
     @property
+    def rid(self):
+        return self._rid
+
+    @rid.setter
     def rid(self, rid):
         validators.validate_resource_identifier(rid)
         self._rid = rid
