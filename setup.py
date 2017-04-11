@@ -19,7 +19,7 @@ def read(*names, **kwargs):
 
 setup(
     name="pyfes",
-    version="0.1.0",
+    version=read("VERSION"),
     description="A python implementation of OGC FES/ISO 19143",
     long_description=read("README.md"),
     author="Ricardo Garcia Silva",
