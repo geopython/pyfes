@@ -39,3 +39,17 @@ jobs:
       install: pip install codecov tox
       script: tox -- --exitfirst -m integration
       after_success: codecov --disable search --flags integrationtests
+
+    - stage: deploy
+      python: "2.7"
+      script: pass
+      deploy:
+        provider: pypi
+        server: https://testpypi.python.org/pypi
+        user:
+          secure: "RWX1IG6/bGy7q+wJq13c4xhwQFAodh6RzBkd5algrDXpgb4Sj+MfTrAHW5s4fiSVj6pRD9P7mtq8WwaKzfKdoZI+v3laaqYh+maLH/Q2JB3txTHbaCfmJEe1+N9FGNi7hMTJhWQV+jWYDR+2wjMMcqInpo4/Pug7yGvkimf1rwiN06odnkb3YYMD39XMy11qX89Xu6lYdzw/1VEMdQ8vf9ITjHzLUgXT0GqlLDoHz1JjN25U+wjIaZqshL4Gjdqjh84uzYycNaZrQKogVe94WQ5NJO1Mroq5BAgbmTiF8Erk0DUqQV2l57RFBpQVwf6IvhICkt9qZ9fT+PkRi/eLy/ejHmcuHPxyRqSae2CoCv/pJRD3o34ySOoGb15APDAXjwrRPOQw5Xn9mMxjkMXH405b356CB/8z3Yi4PN0DupAc3+cz2eqQwZuGrgbjkWNQMoAZFtsYrCyc8Rm8t1iDxciEVYYcMics3Y0glvEylPL3NmIr1cm+S8RGsE3cil5HZ4Ec0HVpgd1qj/98X33Bpjny76Hdzx4ZJ6Ek0qvxQ3nrNevWpOGBO/ytRqkS+n7xuplCaIynTFnO6PtwJSx8u0qn181dgYmgpFA8snJG6jcIiLvodXJNIh53SzXSwXPIChsQkW3aEhWvkpm8w5inF8Ou3wigwPY2beIGqsy9ubM="
+        password:
+          secure: "cEvsEFgj7aF2ZK0MFaKpi0t2LL12zuh66FxguSIDMZxeGWLa3o5VOsknifhJ4dWjXDy6k/UTOChMQQUIH2W6p58rkWTIgOL5VtgWlpkvevPBibj0Q5EXVmsAPl5Lzs26xqI4Gcwrnn1YOYl8R67rYp7iGPyIwxmbKh1dGImPxVq8DENSG5Mv1UtgsNezC9RxWjgYEXkapHhZgnwytg4VxAQglaZTf9LrG82RUlIa8ToXzQ5OlQQ+RzGAlGGqQ0VKOs6Y10istIh/1iJVKWkKHln7q2utCvwYvrngrFYttt3nDU4RbmjbuCp52+wUnE+x7d3fb8A2AmlQgx3tTLDvxReWUjacPhx756bF02gQfgVmb09/5sK/Kmap6PLe1SHDZHVqW44KD5iKs5Ag3E+YLXHeBWkWxhp4Pl7h70LeSl6vINbYs+Mk5bty0U/1yJ2VJVlkGduAkYpAKA7VhuZ+RzqcZ7qOoaTZotp7a8pYBg7Pmp5R+x6hMKWT0eEBLZwxwJdMedLbMTO9k9Ekb3Hmkbhde30atJioJDkpnOn/8c8GM+Wlu6S7p4Rw/8LVsEhqUkA/kIvhZVDTWyCRqmIn5qnYQW/kOrstVNtliWqP2sWlaVpzA9AUYuOQaVtqqV52UtmuPQy96pmRc48Pz8iuVt7xW09E8uVdhQ6F1OS6vHw="
+        distributions: "sdist bdist_wheel"
+      on:
+        tags: true
