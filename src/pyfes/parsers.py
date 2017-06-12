@@ -43,8 +43,11 @@ def parse_filter(data, **kwargs):
             logger.debug("Trying to parse with parser {}...".format(parser))
             result = parser.parse(data)
             break
-        except Exception:
-            logger.debug("Parsing with parser {} failed".format(parser))
+        except Exception as exc:
+            logger.debug(
+                "Parsing with parser {} failed. "
+                "Error was: {}".format(parser, exc)
+            )
     else:
-        logger.error("Could not parse data")
+        raise RuntimeError("Could not parse data")
     return result

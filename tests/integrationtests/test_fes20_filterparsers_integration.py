@@ -1,13 +1,11 @@
-"""Unit tests for pyfes.fes20.filterparsers."""
+"""Integration tests for pyfes.fes20.filterparsers."""
 
-from lxml import etree
 import pytest
 
 from pyfes.fes20.operators import BinaryComparisonOperator
 from pyfes.fes20.operators import BinaryComparisonName
 from pyfes.fes20 import expressions
 from pyfes.fes20 import filterparsers
-from pyfes.fes20.namespaces import NAMESPACES
 
 pytestmark = pytest.mark.integration
 
