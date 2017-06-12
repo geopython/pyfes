@@ -42,6 +42,7 @@ jobs:
 
     - stage: deploy
       install: true
+      script: true
       deploy:
         provider: pypi
         server: https://testpypi.python.org/pypi
