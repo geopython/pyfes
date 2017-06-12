@@ -11,11 +11,15 @@ An implementation of [OGC FES/ISO1943](http://www.opengeospatial.org/standards/f
 ## Installation
 
 The most straightforward way to install this project  at the moment
-is to use pip with the repository's URL. Add the `--editable` flag
-to the `pip` command in order to get a dev install and hack on the
-code.
+is to clone this repository and use pip to install both the requirements and 
+the project itself. pyfes will eventually be available on pypi, once the 
+development stabilizes a bit
 
-    pip install git+[repo_url]#egg=pyfes
+    mkvirtualenv pyfes  # if using virtualenvwrapper
+    git clone https://github.com/geopython/pyfes.git
+    cd pyfes
+    pip install --requirement requirements/dev.txt
+    pip install --editable .
 
 
 ## Testing
