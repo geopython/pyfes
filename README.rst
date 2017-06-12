@@ -1,19 +1,22 @@
-# pyfes
+pyfes
+=====
 
-[![Build
-Status](https://travis-ci.org/geopython/pyfes.svg?branch=master)](https://travis-ci.org/geopython/pyfes)
-[![codecov](https://codecov.io/gh/geopython/pyfes/branch/master/graph/badge.svg)](https://codecov.io/gh/geopython/pyfes)
+.. image:: https://travis-ci.org/geopython/pyfes.svg?branch=master
+    :target: https://travis-ci.org/geopython/pyfes
+
+.. image:: https://codecov.io/gh/geopython/pyfes/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/geopython/pyfes
+
+An implementation of `OGC FES/ISO1943 <http://www.opengeospatial.org/standards/filter>`_
 
 
-An implementation of [OGC FES/ISO1943](http://www.opengeospatial.org/standards/filter)
-
-
-## Installation
+Installation
+------------
 
 The most straightforward way to install this project  at the moment
 is to clone this repository and use pip to install both the requirements and 
 the project itself. pyfes will eventually be available on pypi, once the 
-development stabilizes a bit
+development stabilizes a bit::
 
     mkvirtualenv pyfes  # if using virtualenvwrapper
     git clone https://github.com/geopython/pyfes.git
@@ -22,15 +25,17 @@ development stabilizes a bit
     pip install --editable .
 
 
-## Testing
+Testing
+-------
 
-pyfes uses [py.test](http://docs.pytest.org/en/latest/) for testing.
-Run tests with:
+pyfes uses `py.test <http://docs.pytest.org/en/latest/>`_ for testing.
+Run tests with::
 
     py.test -m unit --cov pyfes
 
 
-## OGC CQL parser - work-in-progress
+OGC CQL parser - work-in-progress
+---------------------------------
 
 The CQL parser is generated with grako, taking as input the CQL definition
 in ebnf.
