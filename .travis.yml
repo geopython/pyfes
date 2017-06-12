@@ -41,6 +41,7 @@ jobs:
       after_success: codecov --disable search --flags integrationtests
 
     - stage: deploy
+      install: true
       deploy:
         provider: pypi
         server: https://testpypi.python.org/pypi
