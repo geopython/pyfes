@@ -21,12 +21,10 @@ setup(
     name="pyfes",
     version=read("VERSION"),
     description="A python implementation of OGC FES/ISO 19143",
-    long_description=read("README.md"),
+    long_description=read("README.rst"),
     author="Ricardo Garcia Silva",
     author_email="ricardo.garcia.silva@gmail.com",
     url="https://github.com/geopython/pyfes",
-    classifiers=[""],
-    platforms=[""],
     license="Apache license",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
@@ -35,5 +33,18 @@ setup(
     install_requires=[
         "lxml",
         "enum34",
+    ],
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.5",
+    ],
+    keywords=[
+        "cql",
+        "fes",
+        "filter",
+        "ogc",
+        "query",
     ]
 )
