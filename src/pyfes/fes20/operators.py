@@ -4,11 +4,10 @@ Operators are used in filter parsers.
 
 """
 
-from collections import namedtuple
-
 from enum import Enum
 
 from . import expressions
+from .. import geometries
 from .. import errors
 from .. import validators
 
@@ -100,7 +99,7 @@ class SingleExpressionOperator(NonIdOperator):
 
     @expression.setter
     def expression(self, expression):
-        validate_operand(expression)
+        validate_operand(expression, allowed_types=self._allowed_operand_types)
         self._expression = expression
 
 
@@ -125,7 +124,7 @@ class DoubleExpressionOperator(NonIdOperator):
 
     @first_expression.setter
     def first_expression(self, expression):
-        validate_operand(expression)
+        validate_operand(expression, allowed_types=self._allowed_operand_types)
         self._first_expression = expression
 
     @property
@@ -134,7 +133,7 @@ class DoubleExpressionOperator(NonIdOperator):
 
     @second_expression.setter
     def second_expression(self, expression):
-        validate_operand(expression)
+        validate_operand(expression, allowed_types=self._allowed_operand_types)
         self._second_expression = expression
 
 
@@ -222,7 +221,7 @@ class BetweenComparisonOperator(SingleExpressionOperator):
 
     @lower_boundary.setter
     def lower_boundary(self, expression):
-        validate_operand(expression)
+        validate_operand(expression, allowed_types=self._allowed_operand_types)
         self._lower_boundary = expression
 
     @property
@@ -231,7 +230,7 @@ class BetweenComparisonOperator(SingleExpressionOperator):
 
     @upper_boundary.setter
     def lower_boundary(self, expression):
-        validate_operand(expression)
+        validate_operand(expression, allowed_types=self._allowed_operand_types)
         self._upper_boundary = expression
 
 
@@ -266,7 +265,7 @@ class DistanceOperator(SingleExpressionOperator):
     _geometry = None
     _operator_type = None
 
-    def __init__(self, expression, operator_type, geometry, distance):
+    def __init__(self, operator_type, expression, geometry, distance):
         super(DistanceOperator, self).__init__(expression=expression)
         self.operator_type = operator_type
         self.geometry = geometry
@@ -297,7 +296,7 @@ class BinarySpatialOperator(SingleExpressionOperator):
     _second_operand = None
     _operator_type = None
 
-    def __init__(self, first_operand, second_operand, operator_type):
+    def __init__(self, operator_type, first_operand, second_operand):
         super(BinarySpatialOperator, self).__init__(expression=first_operand)
         self.operator_type = operator_type
         self.second_operand = second_operand
@@ -334,7 +333,7 @@ class TemporalOperator(SingleExpressionOperator):
     _second_operand = None
     _operator_type = None
 
-    def __init__(self, first_operand, second_operand, operator_type):
+    def __init__(self, operator_type, first_operand, second_operand):
         super(TemporalOperator, self).__init__(expression=first_operand)
         self.operator_type = operator_type
         self.second_operand = second_operand
@@ -371,7 +370,7 @@ class BinaryLogicOperator(DoubleExpressionOperator):
     _operator_type = None
     _allowed_operand_types = (expressions.Expression, NonIdOperator,)
 
-    def __init__(self, first_expression, second_expression, operator_type):
+    def __init__(self, operator_type, first_expression, second_expression):
         super(BinaryLogicOperator, self).__init__(
             first_expression=first_expression,
             second_expression=second_expression
@@ -394,7 +393,7 @@ class UnaryLogicOperator(SingleExpressionOperator):
     _operator_type = None
     _allowed_operand_types = (expressions.Expression, NonIdOperator,)
 
-    def __init__(self, operand, operator_type):
+    def __init__(self, operator_type, operand):
         super(UnaryLogicOperator, self).__init__(expression=operand)
         self.operator_type = operator_type
 
@@ -434,3 +433,24 @@ class ResourceId(IdentifierOperator):
     def rid(self, rid):
         validators.validate_resource_identifier(rid)
         self._rid = rid
+
+
+class SpatialDescription(object):
+    _value = None
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, new_value):
+        allowed = isinstance(
+            new_value,
+            (
+                expressions.ValueReference,
+                geometries.Geometry,
+                geometries.Envelope
+            )
+        )
+        if allowed:
+            self._value = new_value

@@ -4,12 +4,10 @@ from lxml import etree
 
 from . import expressions
 from . import operators
-from .operators import BinaryComparisonName
-from .operators import DistanceOperatorName
-from .operators import SpatialOperatorName
 from . namespaces import NAMESPACES
+from .. import errors
 from ..utils import XML_PARSER
-from ..utils import parse_gml
+from ..geometries import parse_gml
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +28,20 @@ class FesFilterParser(BaseFilterParser):
 
     VERSION = "2.0.2"
 
+    _OPERATOR_PARSER_HANDLERS = {
+        operators.BinaryComparisonName: "parse_binary_comparison_operator",
+        operators.BinaryLogicType: "parse_binary_logic_operator",
+        operators.DistanceOperatorName: "parse_distance_operator",
+        operators.SpatialOperatorName: "parse_binary_spatial_operator",
+        operators.UnaryLogicType: "parse_unary_logic_operator",
+        operators.TemporalOperatorName: "parse_temporal_operator",
+    }
+
     def __init__(self, etree_parser=None):
         self.etree_parser = etree_parser or XML_PARSER
 
-    def parse(self, data):
-        """Parse the input data string.
+    def parse_filter(self, data):
+        """Parse the input filter.
 
         Parameters
         ----------
@@ -42,30 +49,33 @@ class FesFilterParser(BaseFilterParser):
             The fes:Filter string to parse
 
         """
-
         data_element = etree.fromstring(data, parser=self.etree_parser)
         qualified_name = etree.QName(data_element)
         if not qualified_name == etree.QName(NAMESPACES["fes"], "Filter"):
-            raise RuntimeError("Invalid filter element")  # TODO: Replace with a proper exception
+            raise RuntimeError("Invalid filter element")
         filter_predicate = data_element[0]
+        return self._parse_predicate(filter_predicate)
+
+    def _parse_predicate(self, filter_predicate):
+        """Parse the input data string.
+
+        Parameters
+        ----------
+        filter_predicate: etree.Element
+
+        """
+
         predicate_qname = etree.QName(filter_predicate)
         if predicate_qname.namespace != NAMESPACES["fes"]:
             raise RuntimeError("Invalid operator element")
         predicate_name = predicate_qname.localname
-        # TODO: Add remaining filter predicates (operators, fes:Function, Id..)
-        if predicate_name in (m.value for m in BinaryComparisonName):
-            result = self.parse_binary_comparison_operator(filter_predicate)
-        elif predicate_name in (m.value for m in DistanceOperatorName):
-            result = self.parse_distance_operator(filter_predicate)
-        elif predicate_name in (m.value for m in SpatialOperatorName):
-            result = self.parse_binary_spatial_operator(filter_predicate)
-        else:
-            raise RuntimeError("Unrecognized operator")
-        return result
+        operator_type = self._get_operator_type(predicate_name)
+        handler = getattr(self, self._OPERATOR_PARSER_HANDLERS[operator_type])
+        return handler(filter_predicate)
 
     def parse_binary_comparison_operator(self, operator_element):
         return operators.BinaryComparisonOperator(
-            operator_type=BinaryComparisonName(
+            operator_type=operators.BinaryComparisonName(
                 etree.QName(operator_element).localname),
             first_expression=self.parse_expression(operator_element[0]),
             second_expression=self.parse_expression(operator_element[1]),
@@ -80,16 +90,19 @@ class FesFilterParser(BaseFilterParser):
 
     def parse_binary_spatial_operator(self, operator_element):
         return operators.BinarySpatialOperator(
-            operator_type=SpatialOperatorName(
+            operator_type=operators.SpatialOperatorName(
                 etree.QName(operator_element).localname),
             first_operand=self.parse_expression(operator_element[0]),
             second_operand=self.parse_spatial_description(operator_element[1])
         )
 
+    def parse_binary_logic_operator(self, operator_element):
+        raise NotImplementedError
+
     def parse_expression(self, expression_element):
         qname = etree.QName(expression_element)
         if qname.namespace != NAMESPACES["fes"]:
-            raise RuntimeError("Invalid expression namespace")
+            raise errors.ValidationError("Invalid expression namespace")
         parser = {
             "ValueReference": self.parse_value_reference_expression,
             "Literal": self.parse_literal_expression,
@@ -108,7 +121,7 @@ class FesFilterParser(BaseFilterParser):
         """
         try:
             result = self.parse_expression(element)
-        except KeyError:
+        except (KeyError, errors.ValidationError):
             result = parse_gml(element)
         return result
 
@@ -132,6 +145,23 @@ class FesFilterParser(BaseFilterParser):
         return expressions.Function(
             name=function_element.text
         )
+
+    def parse_unary_logic_operator(self, operator_element):
+        return operators.UnaryLogicOperator(
+            operator_type=operators.UnaryLogicType(
+                etree.QName(operator_element).localname),
+            operand=self._parse_predicate(operator_element[0])
+        )
+
+    def _get_operator_type(self, name):
+        for type_ in self._OPERATOR_PARSER_HANDLERS.keys():
+            if name in (item.value for item in type_):
+                result = type_
+                break
+        else:
+            raise RuntimeError(
+                "Unrecognized operator: {!r}".format(name))
+        return result
 
 
 class OgcCqlParser(BaseFilterParser):

@@ -54,5 +54,5 @@ pytestmark = pytest.mark.integration
 ])
 def test_fes_filter_parser_parse(filter_, expected):
     parser = filterparsers.FesFilterParser()
-    result = parser.parse(data=filter_)
+    result = parser.parse_filter(data=filter_)
     assert result == expected

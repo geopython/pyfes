@@ -18,36 +18,6 @@ def lazy_load(path, package="pyfes"):
     return getattr(the_module, class_name)
 
 
-def parse_gml(gml_element):
-    """Parse a GML element into a WKT representation."""
-    qname = etree.QName(gml_element)
-    # TODO: Add other GML geometry types
-    coordinates = get_gml_coordinates(gml_element)
-    if qname.localname == "Point":
-        result = "POINT({})".format(coordinates)
-    else:
-        raise RuntimeError("Invalid geometry element")
-    return result
-
-
-def get_gml_coordinates(gml_element):
-    namespaces = {
-        "gml32": "http://www.opengis.net/gml/3.2",
-        "gml2": "http://www.opengis.net/gml",
-    }
-    try:
-        coordinates = gml_element.xpath(
-            "gml32:pos/text()", namespaces=namespaces)[0]
-    except IndexError:
-        try:
-            coordinates = gml_element.xpath(
-                "gml2:coordinates/text()", namespaces=namespaces)[0]
-            coordinates = coordinates.replace(",", " ")
-        except IndexError:
-            raise RuntimeError("Invalid GML element")
-    return coordinates
-
-
 class ReadOnlyList(object):
     _data = []
 
